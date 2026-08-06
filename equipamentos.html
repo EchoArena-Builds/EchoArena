@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<script src="./js/guard.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equipamentos — Echo Arena</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./css/site.css">
+<style>
+/* ---- controles ---- */
+.tools{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,200px) minmax(150px,200px);
+  gap:12px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.tools label{display:block;margin-bottom:7px;font-size:10.5px;font-weight:700;
+  letter-spacing:.09em;text-transform:uppercase;color:var(--dim)}
+.tools input,.tools select{width:100%;background:#150F2B;border:1px solid var(--line2);
+  border-radius:9px;padding:10px 12px;color:var(--ink);font:inherit;font-size:13px}
+.tools input:focus,.tools select:focus{outline:none;border-color:var(--pur)}
+
+/* ---- grade ---- */
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+
+.eq{position:relative;display:grid;grid-template-columns:64px minmax(0,1fr);gap:12px;
+  align-items:center;padding:13px;border-radius:12px;background:var(--card);
+  border:1px solid var(--line);border-left:3px solid var(--rc,var(--line2));
+  cursor:pointer;transition:.16s}
+.eq:hover{transform:translateY(-2px);border-color:var(--rc,var(--line2))}
+.eq .ic{width:64px;height:64px;border-radius:10px;overflow:hidden;position:relative;
+  border:1px solid var(--line2);background:#0F0C22}
+.eq .ic .media{position:absolute;inset:0}
+.eq .tx{min-width:0}
+.eq .tx b{display:block;font-size:13px;font-weight:600;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.eq .tx .rar{display:inline-block;margin-top:4px;font-size:9px;font-weight:800;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--rc,var(--dim))}
+.eq .tx .slot{display:block;margin-top:3px;color:var(--faint);font-size:10px}
+.eq .set{position:absolute;top:10px;right:11px;font-size:8.5px;font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--pur-lt);
+  padding:3px 7px;border:1px solid #3c3266;border-radius:999px;background:#1d1638}
+
+/* ---- painel de detalhe ---- */
+.ed-backdrop{position:fixed;inset:0;z-index:80;display:none;background:rgba(5,3,11,.78);
+  backdrop-filter:blur(4px)}
+.ed-backdrop.open{display:block}
+.ed{position:fixed;top:0;right:0;bottom:0;z-index:81;width:min(440px,100%);
+  display:flex;flex-direction:column;overflow:hidden;border-left:1px solid var(--line2);
+  background:var(--panel);transform:translateX(100%);transition:transform .22s ease}
+.ed.open{transform:translateX(0)}
+.ed-head{display:grid;grid-template-columns:82px minmax(0,1fr) auto;gap:13px;
+  align-items:start;padding:20px;border-bottom:1px solid var(--line)}
+.ed-head .art{width:82px;height:82px;border-radius:12px;overflow:hidden;position:relative;
+  border:1px solid var(--rc,var(--line2));background:#090716}
+.ed-head .art .media{position:absolute;inset:0}
+.ed-head h2{font-size:21px;line-height:1.1;text-transform:uppercase;color:var(--rc,var(--ink))}
+.ed-head .set-name{font-size:9.5px;font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--pur-lt);margin-bottom:4px}
+.ed-head .slot{margin-top:6px;color:var(--faint);font-size:10.5px}
+.ed-close{width:32px;height:32px;border:1px solid var(--line2);border-radius:9px;
+  background:transparent;color:var(--dim);font-size:15px}
+.ed-body{flex:1;overflow-y:auto;padding:20px}
+.ed-section{margin-bottom:22px}
+.ed-section h3{margin-bottom:11px;font-size:10.5px;font-weight:800;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--faint);display:flex;justify-content:space-between;gap:10px}
+.ed-desc{color:var(--dim);font-size:12.5px;line-height:1.7;white-space:pre-wrap}
+
+.rar-picker{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.rar-picker::-webkit-scrollbar{display:none}
+.rar-btn{flex:0 0 auto;padding:7px 10px;border-radius:8px;border:1px solid var(--line2);
+  background:#0b0919;font-size:9px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--rc,#fff);white-space:nowrap;cursor:pointer}
+.rar-btn.on{border-color:var(--rc);background:#ffffff10}
+
+.st-list{display:grid;gap:8px}
+.st-row{display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:11px;border-radius:9px;background:#0b0919;border:1px solid var(--line)}
+.st-row span{color:var(--dim);font-size:11.5px}
+.st-row strong{font-size:15px;color:var(--rc,var(--grn));white-space:nowrap}
+
+.set-progress{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.set-progress .track{flex:1;height:7px;background:#090716;border-radius:10px;
+  overflow:hidden;border:1px solid var(--line)}
+.set-progress .track i{display:block;height:100%;
+  background:linear-gradient(90deg,var(--pur),var(--gold))}
+.set-bonus{display:grid;grid-template-columns:36px minmax(0,1fr);gap:10px;padding:10px;
+  border-radius:10px;border:1px solid var(--line);background:#0b0919;margin-bottom:8px}
+.set-bonus .pieces{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;
+  background:#1b1639;font-weight:800;color:var(--pur-lt);font-size:14px}
+.set-bonus b{display:block;font-size:11.5px;margin-bottom:3px}
+.set-bonus p{font-size:10.5px;color:var(--dim);line-height:1.5}
+
+.reco{padding:12px;border-radius:10px;background:#16112f;border:1px solid #8b5cf644;
+  color:var(--dim);font-size:11.5px;line-height:1.6}
+.reco b{display:block;color:var(--pur-lt);margin-bottom:5px}
+
+@media(max-width:1340px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:1080px){
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tools{grid-template-columns:1fr 1fr}
+}
+@media(max-width:640px){
+  .grid{grid-template-columns:1fr}
+  .tools{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div data-site-content>
+
+  <header class="page-head">
+    <div>
+      <h1>Equipamentos</h1>
+      <p>Atributos por raridade, conjuntos e bônus.</p>
+    </div>
+    <div class="page-count" id="count">—</div>
+  </header>
+
+  <section class="tools">
+    <div>
+      <label for="search">Buscar</label>
+      <input id="search" type="search" placeholder="Nome do equipamento..." autocomplete="off">
+    </div>
+    <div>
+      <label for="rarity">Raridade</label>
+      <select id="rarity"><option value="">Todas</option></select>
+    </div>
+    <div>
+      <label for="sort">Ordenar</label>
+      <select id="sort">
+        <option value="ordem">Ordem de exibição</option>
+        <option value="nome">Nome</option>
+        <option value="raridade">Raridade</option>
+      </select>
+    </div>
+  </section>
+
+  <div class="filters" id="slot-filters"></div>
+
+  <section class="grid" id="grid">
+    <div class="loading-card">Carregando equipamentos...</div>
+  </section>
+
+</div>
+
+<div class="ed-backdrop" id="ed-backdrop"></div>
+
+<aside class="ed" id="eq-detail" aria-hidden="true">
+  <div class="ed-head">
+    <div class="art"><div class="media empty" id="ed-media"></div></div>
+    <div>
+      <div class="set-name" id="ed-set">—</div>
+      <h2 id="ed-name">—</h2>
+      <div class="slot" id="ed-slot"></div>
+    </div>
+    <button class="ed-close" id="ed-close" aria-label="Fechar">✕</button>
+  </div>
+  <div class="ed-body" id="ed-body"></div>
+</aside>
+
+<script type="module" src="./js/equipamentos.js"></script>
+</body>
+</html>
