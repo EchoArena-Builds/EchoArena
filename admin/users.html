@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Usuários — Echo Arena Admin</title>
+
+  <link
+    rel="stylesheet"
+    href="./css/admin.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="./css/admin-shell.css"
+  >
+
+  <style>
+    .users-page {
+      display: grid;
+      gap: 18px;
+    }
+
+    .users-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .users-toolbar-copy strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    .users-toolbar-copy span {
+      display: block;
+      margin-top: 5px;
+      color: var(--admin-muted);
+      font-size: 12px;
+    }
+
+    .users-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .users-summary-card {
+      padding: 14px;
+      border: 1px solid var(--admin-line);
+      border-radius: 12px;
+      background: var(--admin-panel);
+    }
+
+    .users-summary-card span {
+      display: block;
+      color: var(--admin-muted);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .users-summary-card strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .users-filters {
+      display: grid;
+      grid-template-columns:
+        minmax(220px, 1fr)
+        minmax(150px, 190px)
+        minmax(150px, 190px)
+        minmax(120px, 150px);
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--admin-line);
+      border-radius: 14px;
+      background: var(--admin-panel);
+    }
+
+    .users-filter-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .users-filter-field label {
+      color: #c8cfdd;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .users-message {
+      min-height: 22px;
+      color: var(--admin-muted);
+      font-size: 13px;
+    }
+
+    .users-message.error {
+      color: #ff8585;
+    }
+
+    .users-message.ok {
+      color: #4ade80;
+    }
+
+    /* ---- barra de seleção em massa ---- */
+
+    .users-bulk {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 13px 16px;
+      border: 1px solid #3c3266;
+      border-radius: 12px;
+      background: #1a1435;
+    }
+
+    .users-bulk.is-visible {
+      display: flex;
+    }
+
+    .users-bulk-count {
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .users-bulk-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .users-bulk-actions .admin-button,
+    .users-bulk-actions .admin-select {
+      min-height: 34px;
+      padding: 6px 11px;
+      font-size: 11px;
+    }
+
+    .users-bulk-actions .danger {
+      color: #ff9aaa;
+      border-color: #71303b;
+      background: #2a1016;
+    }
+
+    /* ---- cabeçalho da lista ---- */
+
+    .users-list-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 16px;
+      color: var(--admin-muted);
+      font-size: 11px;
+    }
+
+    .users-list-head label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    /* ---- linhas ---- */
+
+    .users-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .user-row {
+      display: grid;
+      grid-template-columns:
+        auto
+        minmax(0, 1.4fr)
+        minmax(120px, 0.5fr)
+        minmax(140px, 0.6fr)
+        auto;
+      gap: 14px;
+      align-items: center;
+      min-width: 0;
+      padding: 14px 16px;
+      border: 1px solid var(--admin-line);
+      border-radius: 12px;
+      background: var(--admin-panel);
+      transition: border-color 0.15s ease;
+    }
+
+    .user-row.is-blocked {
+      border-color: #71303b;
+      background: #1b0f16;
+    }
+
+    .user-row.is-selected {
+      border-color: rgba(139, 92, 246, 0.7);
+    }
+
+    .user-select {
+      width: 17px;
+      height: 17px;
+      accent-color: #8b5cf6;
+      cursor: pointer;
+    }
+
+    .user-identity {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      cursor: pointer;
+    }
+
+    .user-avatar {
+      flex: 0 0 42px;
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--admin-line);
+      border-radius: 10px;
+      background: #07101f;
+      color: var(--admin-muted);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-identity-copy {
+      min-width: 0;
+    }
+
+    .user-identity-copy strong {
+      display: block;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-identity-copy span {
+      display: block;
+      margin-top: 3px;
+      color: var(--admin-muted);
+      font-size: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 4px 9px;
+      border: 1px solid #3c3266;
+      border-radius: 999px;
+      background: #1d1638;
+      color: #c9b7ff;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .user-badge.admin {
+      border-color: #6f5618;
+      background: #2a2009;
+      color: #ffd76d;
+    }
+
+    .user-badge.blocked {
+      border-color: #71303b;
+      background: #2a1016;
+      color: #ff9aaa;
+    }
+
+    .user-badge.ok {
+      border-color: #28613c;
+      background: #0c2918;
+      color: #8bf0aa;
+    }
+
+    .user-status-copy {
+      min-width: 0;
+    }
+
+    .user-status-copy small {
+      display: block;
+      margin-top: 5px;
+      color: var(--admin-muted);
+      font-size: 9.5px;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .user-actions .admin-button {
+      min-height: 34px;
+      padding: 7px 12px;
+      font-size: 10px;
+    }
+
+    .user-actions .danger {
+      color: #ff9aaa;
+      border-color: #71303b;
+      background: #2a1016;
+    }
+
+    .users-empty {
+      padding: 36px;
+      border: 1px dashed var(--admin-line);
+      border-radius: 14px;
+      background: var(--admin-panel);
+      color: var(--admin-muted);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    /* ---- paginação ---- */
+
+    .users-pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 4px 2px;
+    }
+
+    .users-pagination-info {
+      color: var(--admin-muted);
+      font-size: 11px;
+    }
+
+    .users-pagination-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .users-pagination-controls .admin-button {
+      min-height: 34px;
+      padding: 7px 13px;
+      font-size: 11px;
+    }
+
+    /* ---- painel de detalhes ---- */
+
+    .user-drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: none;
+      background: rgba(3, 7, 15, 0.72);
+      backdrop-filter: blur(3px);
+    }
+
+    .user-drawer-backdrop.is-open {
+      display: block;
+    }
+
+    .user-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 81;
+      width: min(440px, 100%);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-left: 1px solid var(--admin-line);
+      background: #0b1221;
+      transform: translateX(100%);
+      transition: transform 0.22s ease;
+    }
+
+    .user-drawer.is-open {
+      transform: translateX(0);
+    }
+
+    .user-drawer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 20px;
+      border-bottom: 1px solid var(--admin-line);
+    }
+
+    .user-drawer-header h2 {
+      margin: 0;
+      font-size: 18px;
+      word-break: break-word;
+    }
+
+    .user-drawer-header p {
+      margin: 5px 0 0;
+      color: var(--admin-muted);
+      font-size: 11px;
+      word-break: break-word;
+    }
+
+    .user-drawer-close {
+      flex: 0 0 auto;
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--admin-line);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--admin-muted);
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .user-drawer-body {
+      flex: 1;
+      display: grid;
+      gap: 18px;
+      align-content: start;
+      padding: 20px;
+      overflow-y: auto;
+    }
+
+    .user-drawer-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .user-drawer-stat {
+      padding: 12px;
+      border: 1px solid var(--admin-line);
+      border-radius: 10px;
+      background: #09111f;
+      text-align: center;
+    }
+
+    .user-drawer-stat span {
+      display: block;
+      color: var(--admin-muted);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .user-drawer-stat strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .user-drawer-section h3 {
+      margin: 0 0 10px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--admin-muted);
+    }
+
+    .user-drawer-fields {
+      display: grid;
+      gap: 7px;
+    }
+
+    .user-drawer-field {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 11px;
+      border: 1px solid var(--admin-line);
+      border-radius: 9px;
+      background: #09111f;
+      font-size: 11px;
+    }
+
+    .user-drawer-field span {
+      color: var(--admin-muted);
+    }
+
+    .user-drawer-field strong {
+      text-align: right;
+      word-break: break-word;
+    }
+
+    .user-drawer-log {
+      display: grid;
+      gap: 8px;
+    }
+
+    .user-drawer-log-item {
+      padding: 10px 12px;
+      border: 1px solid var(--admin-line);
+      border-left-width: 3px;
+      border-radius: 9px;
+      background: #09111f;
+    }
+
+    .user-drawer-log-item.block {
+      border-left-color: #f87171;
+    }
+
+    .user-drawer-log-item.unblock {
+      border-left-color: #4ade80;
+    }
+
+    .user-drawer-log-item.role_change {
+      border-left-color: #8b5cf6;
+    }
+
+    .user-drawer-log-item strong {
+      display: block;
+      font-size: 11px;
+    }
+
+    .user-drawer-log-item span {
+      display: block;
+      margin-top: 4px;
+      color: var(--admin-muted);
+      font-size: 9.5px;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    @media (max-width: 1100px) {
+      .users-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .users-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .user-row {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+      }
+
+      .user-status-copy,
+      .user-role-cell {
+        grid-column: 2 / -1;
+      }
+    }
+
+    @media (max-width: 780px) {
+      .users-filters {
+        grid-template-columns: 1fr;
+      }
+
+      .user-row {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      .user-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div data-admin-content>
+    <section class="users-page">
+
+      <header class="users-toolbar">
+        <div class="users-toolbar-copy">
+          <strong>
+            Gerenciamento de usuários
+          </strong>
+
+          <span>
+            Consulte perfis, altere papéis e controle bloqueios.
+          </span>
+        </div>
+
+        <div>
+          <button
+            id="refresh"
+            class="admin-button"
+            type="button"
+          >
+            Atualizar
+          </button>
+        </div>
+      </header>
+
+      <section class="users-summary">
+        <div class="users-summary-card">
+          <span>Total</span>
+          <strong id="summary-total">—</strong>
+        </div>
+
+        <div class="users-summary-card">
+          <span>Administradores</span>
+          <strong id="summary-admins">—</strong>
+        </div>
+
+        <div class="users-summary-card">
+          <span>Bloqueados</span>
+          <strong id="summary-blocked">—</strong>
+        </div>
+
+        <div class="users-summary-card">
+          <span>Novos (30 dias)</span>
+          <strong id="summary-recent">—</strong>
+        </div>
+      </section>
+
+      <section class="users-filters">
+        <div class="users-filter-field">
+          <label for="search">
+            Buscar
+          </label>
+
+          <input
+            id="search"
+            class="admin-input"
+            type="search"
+            placeholder="Nome de usuário ou exibição..."
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="users-filter-field">
+          <label for="role-filter">
+            Papel
+          </label>
+
+          <select
+            id="role-filter"
+            class="admin-select"
+          >
+            <option value="all">Todos</option>
+          </select>
+        </div>
+
+        <div class="users-filter-field">
+          <label for="status-filter">
+            Situação
+          </label>
+
+          <select
+            id="status-filter"
+            class="admin-select"
+          >
+            <option value="all">Todas</option>
+            <option value="active">Ativos</option>
+            <option value="blocked">Bloqueados</option>
+          </select>
+        </div>
+
+        <div class="users-filter-field">
+          <label for="page-size">
+            Por página
+          </label>
+
+          <select
+            id="page-size"
+            class="admin-select"
+          >
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </section>
+
+      <div
+        id="bulk-bar"
+        class="users-bulk"
+      >
+        <div
+          id="bulk-count"
+          class="users-bulk-count"
+        >
+          0 selecionados
+        </div>
+
+        <div class="users-bulk-actions">
+          <select
+            id="bulk-role"
+            class="admin-select"
+          >
+            <option value="">Alterar papel para...</option>
+          </select>
+
+          <button
+            id="bulk-role-apply"
+            class="admin-button"
+            type="button"
+          >
+            Aplicar
+          </button>
+
+          <button
+            id="bulk-block"
+            class="admin-button danger"
+            type="button"
+          >
+            Bloquear
+          </button>
+
+          <button
+            id="bulk-unblock"
+            class="admin-button"
+            type="button"
+          >
+            Desbloquear
+          </button>
+
+          <button
+            id="bulk-clear"
+            class="admin-button"
+            type="button"
+          >
+            Limpar
+          </button>
+        </div>
+      </div>
+
+      <div
+        id="message"
+        class="users-message"
+        role="status"
+        aria-live="polite"
+      ></div>
+
+      <div class="users-list-head">
+        <label>
+          <input
+            id="select-all"
+            class="user-select"
+            type="checkbox"
+          >
+          Selecionar todos desta página
+        </label>
+      </div>
+
+      <section
+        id="users-list"
+        class="users-list"
+      >
+        <div class="users-empty">
+          Carregando usuários...
+        </div>
+      </section>
+
+      <div class="users-pagination">
+        <div
+          id="pagination-info"
+          class="users-pagination-info"
+        >
+          —
+        </div>
+
+        <div class="users-pagination-controls">
+          <button
+            id="prev-page"
+            class="admin-button"
+            type="button"
+          >
+            Anterior
+          </button>
+
+          <button
+            id="next-page"
+            class="admin-button"
+            type="button"
+          >
+            Próxima
+          </button>
+        </div>
+      </div>
+    </section>
+
+  <div
+    id="drawer-backdrop"
+    class="user-drawer-backdrop"
+  ></div>
+
+  <aside
+    id="user-drawer"
+    class="user-drawer"
+    aria-hidden="true"
+  >
+    <header class="user-drawer-header">
+      <div>
+        <h2 id="drawer-title">—</h2>
+        <p id="drawer-subtitle"></p>
+      </div>
+
+      <button
+        id="drawer-close"
+        class="user-drawer-close"
+        type="button"
+        aria-label="Fechar"
+      >
+        ✕
+      </button>
+    </header>
+
+    <div
+      id="drawer-body"
+      class="user-drawer-body"
+    ></div>
+  </aside>
+  </div>
+
+
+  <script type="module">
+    import {
+      initAdminShell
+    } from './js/admin-shell.js';
+
+    const shell =
+      await initAdminShell({
+        activeId: 'users',
+        pageTitle: 'Usuários',
+        pageSubtitle: 'Comunidade e moderação'
+      });
+
+    if (shell) {
+      await import(
+        './js/users.js'
+      );
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Builds — Echo Arena Admin</title>
+
+  <link
+    rel="stylesheet"
+    href="./css/admin.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="./css/admin-shell.css"
+  >
+
+  <style>
+    .builds-page {
+      display: grid;
+      gap: 18px;
+    }
+
+    .builds-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .builds-toolbar-copy strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    .builds-toolbar-copy span {
+      display: block;
+      margin-top: 5px;
+      color: var(--admin-muted);
+      font-size: 12px;
+    }
+
+    .builds-summary {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .builds-summary-card {
+      padding: 14px;
+      border: 1px solid var(--admin-line);
+      border-radius: 12px;
+      background: var(--admin-panel);
+    }
+
+    .builds-summary-card span {
+      display: block;
+      color: var(--admin-muted);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .builds-summary-card strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .builds-filters {
+      display: grid;
+      grid-template-columns:
+        minmax(200px, 1fr)
+        minmax(140px, 180px)
+        minmax(140px, 180px)
+        minmax(140px, 180px)
+        minmax(110px, 140px);
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--admin-line);
+      border-radius: 14px;
+      background: var(--admin-panel);
+    }
+
+    .builds-filter-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .builds-filter-field label {
+      color: #c8cfdd;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .builds-context {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 12px 16px;
+      border: 1px solid #3c3266;
+      border-radius: 12px;
+      background: #1a1435;
+      font-size: 12px;
+    }
+
+    .builds-context.is-visible {
+      display: flex;
+    }
+
+    .builds-message {
+      min-height: 22px;
+      color: var(--admin-muted);
+      font-size: 13px;
+    }
+
+    .builds-message.error {
+      color: #ff8585;
+    }
+
+    .builds-message.ok {
+      color: #4ade80;
+    }
+
+    .builds-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .build-card {
+      display: grid;
+      grid-template-columns:
+        minmax(0, 1.5fr)
+        minmax(220px, 0.9fr)
+        auto;
+      gap: 16px;
+      align-items: center;
+      min-width: 0;
+      padding: 15px 16px;
+      border: 1px solid var(--admin-line);
+      border-left-width: 3px;
+      border-radius: 12px;
+      background: var(--admin-panel);
+    }
+
+    .build-card.is-featured {
+      border-left-color: #fbbf24;
+    }
+
+    .build-card.is-private {
+      border-left-color: #64748b;
+    }
+
+    .build-card.is-deleted {
+      border-left-color: #f87171;
+      background: #1b0f16;
+      opacity: 0.75;
+    }
+
+    .build-main {
+      min-width: 0;
+    }
+
+    .build-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .build-title strong {
+      font-size: 13.5px;
+      word-break: break-word;
+    }
+
+    .build-subtitle {
+      margin-top: 5px;
+      color: var(--admin-muted);
+      font-size: 10px;
+      word-break: break-word;
+    }
+
+    .build-subtitle a {
+      color: #b99eff;
+      text-decoration: none;
+    }
+
+    .build-subtitle a:hover {
+      text-decoration: underline;
+    }
+
+    .build-description {
+      margin-top: 8px;
+      color: var(--admin-muted);
+      font-size: 10.5px;
+      line-height: 1.55;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .build-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 20px;
+      padding: 3px 8px;
+      border: 1px solid #3c3266;
+      border-radius: 999px;
+      background: #1d1638;
+      color: #c9b7ff;
+      font-size: 8.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .build-badge.featured {
+      border-color: #6f5618;
+      background: #2a2009;
+      color: #ffd76d;
+    }
+
+    .build-badge.private {
+      border-color: #3a4560;
+      background: #131c2e;
+      color: #9fb0cc;
+    }
+
+    .build-badge.deleted {
+      border-color: #71303b;
+      background: #2a1016;
+      color: #ff9aaa;
+    }
+
+    .build-stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .build-stat {
+      padding: 8px 6px;
+      border: 1px solid var(--admin-line);
+      border-radius: 9px;
+      background: #09111f;
+      text-align: center;
+    }
+
+    .build-stat span {
+      display: block;
+      color: var(--admin-muted);
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .build-stat strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+    }
+
+    .build-actions {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .build-actions .admin-button {
+      min-height: 33px;
+      padding: 7px 11px;
+      font-size: 10px;
+    }
+
+    .build-actions .danger {
+      color: #ff9aaa;
+      border-color: #71303b;
+      background: #2a1016;
+    }
+
+    .builds-empty {
+      padding: 36px;
+      border: 1px dashed var(--admin-line);
+      border-radius: 14px;
+      background: var(--admin-panel);
+      color: var(--admin-muted);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .builds-pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 4px 2px;
+    }
+
+    .builds-pagination-info {
+      color: var(--admin-muted);
+      font-size: 11px;
+    }
+
+    .builds-pagination-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .builds-pagination-controls .admin-button {
+      min-height: 34px;
+      padding: 7px 13px;
+      font-size: 11px;
+    }
+
+    @media (max-width: 1280px) {
+      .builds-summary {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .builds-filters {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .build-card {
+        grid-template-columns: minmax(0, 1fr) minmax(200px, auto);
+      }
+
+      .build-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 780px) {
+      .builds-summary,
+      .builds-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .build-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .builds-summary,
+      .builds-filters {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div data-admin-content>
+    <section class="builds-page">
+
+      <header class="builds-toolbar">
+        <div class="builds-toolbar-copy">
+          <strong>
+            Gerenciamento de builds
+          </strong>
+
+          <span>
+            Destaque, despublique ou remova builds da comunidade.
+          </span>
+        </div>
+
+        <div>
+          <button
+            id="refresh"
+            class="admin-button"
+            type="button"
+          >
+            Atualizar
+          </button>
+        </div>
+      </header>
+
+      <section class="builds-summary">
+        <div class="builds-summary-card">
+          <span>Total</span>
+          <strong id="summary-total">—</strong>
+        </div>
+
+        <div class="builds-summary-card">
+          <span>Públicas</span>
+          <strong id="summary-public">—</strong>
+        </div>
+
+        <div class="builds-summary-card">
+          <span>Destacadas</span>
+          <strong id="summary-featured">—</strong>
+        </div>
+
+        <div class="builds-summary-card">
+          <span>Removidas</span>
+          <strong id="summary-deleted">—</strong>
+        </div>
+
+        <div class="builds-summary-card">
+          <span>Últimos 7 dias</span>
+          <strong id="summary-recent">—</strong>
+        </div>
+      </section>
+
+      <div
+        id="context-bar"
+        class="builds-context"
+      >
+        <span id="context-label">—</span>
+
+        <a
+          class="admin-button"
+          href="./builds.html"
+        >
+          Limpar filtro
+        </a>
+      </div>
+
+      <section class="builds-filters">
+        <div class="builds-filter-field">
+          <label for="search">
+            Buscar
+          </label>
+
+          <input
+            id="search"
+            class="admin-input"
+            type="search"
+            placeholder="Título ou identificador..."
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="builds-filter-field">
+          <label for="status-filter">
+            Situação
+          </label>
+
+          <select
+            id="status-filter"
+            class="admin-select"
+          >
+            <option value="active">Ativas</option>
+            <option value="all">Todas</option>
+            <option value="public">Públicas</option>
+            <option value="private">Privadas</option>
+            <option value="featured">Destacadas</option>
+            <option value="deleted">Removidas</option>
+          </select>
+        </div>
+
+        <div class="builds-filter-field">
+          <label for="hero-filter">
+            Herói
+          </label>
+
+          <select
+            id="hero-filter"
+            class="admin-select"
+          >
+            <option value="all">Todos</option>
+          </select>
+        </div>
+
+        <div class="builds-filter-field">
+          <label for="sort-filter">
+            Ordenar
+          </label>
+
+          <select
+            id="sort-filter"
+            class="admin-select"
+          >
+            <option value="recent">Mais recentes</option>
+            <option value="oldest">Mais antigas</option>
+            <option value="views">Mais vistas</option>
+            <option value="likes">Mais curtidas</option>
+            <option value="rating">Melhor avaliadas</option>
+          </select>
+        </div>
+
+        <div class="builds-filter-field">
+          <label for="page-size">
+            Por página
+          </label>
+
+          <select
+            id="page-size"
+            class="admin-select"
+          >
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+      </section>
+
+      <div
+        id="message"
+        class="builds-message"
+        role="status"
+        aria-live="polite"
+      ></div>
+
+      <section
+        id="builds-list"
+        class="builds-list"
+      >
+        <div class="builds-empty">
+          Carregando builds...
+        </div>
+      </section>
+
+      <div class="builds-pagination">
+        <div
+          id="pagination-info"
+          class="builds-pagination-info"
+        >
+          —
+        </div>
+
+        <div class="builds-pagination-controls">
+          <button
+            id="prev-page"
+            class="admin-button"
+            type="button"
+          >
+            Anterior
+          </button>
+
+          <button
+            id="next-page"
+            class="admin-button"
+            type="button"
+          >
+            Próxima
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    import {
+      initAdminShell
+    } from './js/admin-shell.js';
+
+    const shell =
+      await initAdminShell({
+        activeId: 'builds',
+        pageTitle: 'Builds',
+        pageSubtitle: 'Conteúdo da comunidade'
+      });
+
+    if (shell) {
+      await import(
+        './js/builds.js'
+      );
+    }
+  </script>
+</body>
+</html>

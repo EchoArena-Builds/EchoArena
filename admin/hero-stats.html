@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Redirecionando — Echo Arena Admin</title>
+</head>
+<body>
+<script>
+  const params = new URLSearchParams(location.search);
+  const heroId = params.get('hero');
+  const section = params.get('section');
+  const tab = section === 'weapon' ? 'weapon' : 'stats';
+
+  location.replace(
+    heroId
+      ? `./hero-editor.html?id=${encodeURIComponent(heroId)}&tab=${tab}`
+      : './heroes.html'
+  );
+</script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Echo Arena Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#060912;font-family:Inter,sans-serif;color:#fff;display:flex;justify-content:center;
+  align-items:center;min-height:100vh;padding:20px;
+  background-image:radial-gradient(circle at top,#5227b8 0%,transparent 45%)}
+.card{width:100%;max-width:420px;background:#0f1628;border:1px solid #232e49;border-radius:18px;
+  padding:40px;box-shadow:0 25px 70px rgba(0,0,0,.45)}
+.logo{font-family:"Barlow Condensed";font-size:42px;font-weight:800;text-align:center;margin-bottom:8px}
+.logo span{color:#a56dff}
+.sub{text-align:center;color:#9ea7bc;font-size:14px;margin-bottom:35px}
+label{display:block;margin-bottom:8px;font-size:12px;color:#bcc4d7;text-transform:uppercase}
+input{width:100%;padding:14px;background:#08101e;border:1px solid #26334d;border-radius:10px;
+  color:#fff;margin-bottom:18px;font-size:15px;font-family:inherit}
+input:focus{outline:none;border-color:#8d5eff}
+button{width:100%;padding:15px;border:none;border-radius:10px;
+  background:linear-gradient(180deg,#9658ff,#6d28d9);color:#fff;font-size:15px;font-weight:700;
+  cursor:pointer;transition:.2s;font-family:inherit}
+button:hover:not(:disabled){transform:translateY(-2px)}
+button:disabled{opacity:.6;cursor:wait;transform:none}
+#msg{margin-top:18px;text-align:center;font-size:13px;color:#ff8d8d;min-height:18px;line-height:1.5}
+#msg.ok{color:#8bf0aa}
+.checking{text-align:center;color:#9ea7bc;font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">ECHO <span>ARENA</span></div>
+  <div class="sub">Painel Administrativo</div>
+
+  <label>Email</label>
+  <input type="email" id="email" placeholder="admin@email.com" autocomplete="username">
+
+  <label>Senha</label>
+  <input type="password" id="password" placeholder="********" autocomplete="current-password">
+
+  <button id="login">Entrar</button>
+  <div id="msg"></div>
+</div>
+
+<script type="module">
+/* Usa o MESMO cliente do painel. Duas instâncias separadas do
+   Supabase geram sessões que não se enxergam — era isso que
+   alimentava o loop entre login.html e index.html. */
+import { loginAdmin, redirectIfAdmin } from './js/admin-auth.js';
+
+const $ = id => document.getElementById(id);
+
+function say(text, ok = false) {
+  const m = $('msg');
+  if (!m) return;
+  m.textContent = text;
+  m.classList.toggle('ok', ok);
+}
+
+window.addEventListener('error', e => say('Erro: ' + e.message));
+window.addEventListener('unhandledrejection', e =>
+  say('Erro: ' + (e.reason?.message || e.reason))
+);
+
+/* ---------- proteção contra força bruta ---------- */
+
+const RL_KEY = 'echoarena_admin_attempts';
+const MAX_TRIES = 5;
+const LOCK_MS = 15 * 60 * 1000;
+
+function readAttempts() {
+  try {
+    return JSON.parse(localStorage.getItem(RL_KEY)) || { n: 0, until: 0 };
+  } catch {
+    return { n: 0, until: 0 };
+  }
+}
+
+function lockedSeconds() {
+  const a = readAttempts();
+  return a.until > Date.now()
+    ? Math.ceil((a.until - Date.now()) / 1000)
+    : 0;
+}
+
+function registerFail() {
+  const a = readAttempts();
+  a.n += 1;
+  if (a.n >= MAX_TRIES) {
+    a.until = Date.now() + LOCK_MS;
+    a.n = 0;
+  }
+  localStorage.setItem(RL_KEY, JSON.stringify(a));
+}
+
+function resetAttempts() {
+  localStorage.removeItem(RL_KEY);
+}
+
+/* ---------- login ---------- */
+
+let running = false;
+
+async function entrar() {
+  if (running) return;
+
+  const wait = lockedSeconds();
+  if (wait) {
+    say(`Muitas tentativas. Aguarde ${Math.ceil(wait / 60)} minuto(s).`);
+    return;
+  }
+
+  const email = $('email').value.trim();
+  const password = $('password').value;
+
+  if (!email || !password) {
+    say('Preencha e-mail e senha.');
+    return;
+  }
+
+  running = true;
+  $('login').disabled = true;
+  $('login').textContent = 'Entrando...';
+  say('');
+
+  try {
+    await loginAdmin(email, password);
+    resetAttempts();
+    say('Entrando no painel...', true);
+    location.replace('./index.html');
+  } catch (err) {
+    registerFail();
+    /* atraso fixo: encarece tentativa automatizada */
+    await new Promise(r => setTimeout(r, 700));
+
+    const raw = err?.message || String(err);
+    say(
+      raw === 'Invalid login credentials'
+        ? 'E-mail ou senha incorretos.'
+        : raw
+    );
+    console.error('[login]', err);
+  } finally {
+    running = false;
+    $('login').disabled = false;
+    $('login').textContent = 'Entrar';
+  }
+}
+
+/* ---------- inicialização ---------- */
+
+$('login').addEventListener('click', entrar);
+
+['email', 'password'].forEach(id => {
+  $(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') entrar();
+  });
+});
+
+/* redirectIfAdmin valida o PAPEL antes de redirecionar e respeita
+   o quebra-loop. Sessão de usuário comum não entra mais no painel. */
+say('Verificando sessão...');
+
+redirectIfAdmin('./index.html')
+  .then(redirected => {
+    if (!redirected) say('');
+  })
+  .catch(err => {
+    console.error('[login] falha ao verificar sessão:', err);
+    say('');
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Classes — Echo Arena Admin</title>
+
+  <link rel="stylesheet" href="./css/admin.css">
+  <link rel="stylesheet" href="./css/admin-shell.css">
+
+  <style>
+    .classes-page {
+      display: grid;
+      gap: 18px;
+    }
+
+    .classes-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .classes-toolbar-copy strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    .classes-toolbar-copy span {
+      display: block;
+      margin-top: 5px;
+      color: var(--admin-muted);
+      font-size: 12px;
+    }
+
+    .classes-message {
+      min-height: 22px;
+      color: var(--admin-muted);
+      font-size: 13px;
+    }
+
+    .classes-message.error {
+      color: #ff8585;
+    }
+
+    .classes-message.ok {
+      color: #4ade80;
+    }
+
+    .classes-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .class-row {
+      display: grid;
+      grid-template-columns:
+        minmax(180px, 1fr)
+        minmax(150px, 210px)
+        minmax(180px, 240px)
+        auto;
+      gap: 16px;
+      align-items: center;
+      min-width: 0;
+      padding: 15px 16px;
+      border: 1px solid var(--admin-line);
+      border-left: 3px solid var(--class-color, var(--admin-line));
+      border-radius: 12px;
+      background: var(--admin-panel);
+    }
+
+    .class-identity strong {
+      display: block;
+      font-size: 14px;
+      color: var(--class-color, inherit);
+    }
+
+    .class-identity span {
+      display: block;
+      margin-top: 4px;
+      color: var(--admin-muted);
+      font-size: 10px;
+    }
+
+    .class-field {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .class-field label {
+      color: var(--admin-muted);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .class-color-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .class-color-controls input[type="color"] {
+      flex: 0 0 44px;
+      width: 44px;
+      height: 38px;
+      padding: 2px;
+      border: 1px solid var(--admin-line);
+      border-radius: 9px;
+      background: #08101e;
+      cursor: pointer;
+    }
+
+    .class-color-controls input[type="text"] {
+      min-width: 0;
+      text-transform: uppercase;
+    }
+
+    /* Prévia fiel ao card do site público. */
+    .class-preview {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--admin-line);
+      border-radius: 10px;
+      background: #09111f;
+    }
+
+    .class-preview-thumb {
+      flex: 0 0 40px;
+      width: 40px;
+      height: 45px;
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 50% 35%, var(--class-color, #4c2a7a), #150f2b);
+    }
+
+    .class-preview-copy {
+      min-width: 0;
+    }
+
+    .class-preview-copy strong {
+      display: block;
+      font-size: 12.5px;
+      color: var(--class-color, inherit);
+    }
+
+    .class-preview-copy span {
+      display: block;
+      margin-top: 2px;
+      color: var(--admin-muted);
+      font-size: 10px;
+    }
+
+    .class-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .class-actions .admin-button {
+      min-height: 36px;
+      padding: 8px 13px;
+      font-size: 11px;
+    }
+
+    .classes-empty {
+      padding: 36px;
+      border: 1px dashed var(--admin-line);
+      border-radius: 14px;
+      background: var(--admin-panel);
+      color: var(--admin-muted);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    @media (max-width: 1050px) {
+      .class-row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      }
+
+      .class-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .class-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div data-admin-content>
+    <section class="classes-page">
+
+      <header class="classes-toolbar">
+        <div class="classes-toolbar-copy">
+          <strong>
+            Classes de herói
+          </strong>
+
+          <span>
+            A cor definida aqui é usada no nome do herói em todo o site.
+          </span>
+        </div>
+
+        <div>
+          <button
+            id="refresh"
+            class="admin-button"
+            type="button"
+          >
+            Atualizar
+          </button>
+        </div>
+      </header>
+
+      <div
+        id="message"
+        class="classes-message"
+        role="status"
+        aria-live="polite"
+      ></div>
+
+      <section
+        id="classes-list"
+        class="classes-list"
+      >
+        <div class="classes-empty">
+          Carregando classes...
+        </div>
+      </section>
+    </section>
+  </div>
+
+  <script type="module">
+    import { initAdminShell } from './js/admin-shell.js';
+
+    const shell = await initAdminShell({
+      activeId: 'classes',
+      pageTitle: 'Classes',
+      pageSubtitle: 'Identidade visual dos heróis'
+    });
+
+    if (shell) {
+      await import('./js/classes.js');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Heróis — Echo Arena Admin</title>
+
+  <link
+    rel="stylesheet"
+    href="./css/admin.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="./css/admin-shell.css"
+  >
+
+  <style>
+    .heroes-page {
+      display: grid;
+      gap: 16px;
+    }
+
+    .heroes-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .heroes-toolbar-copy strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    .heroes-toolbar-copy span {
+      display: block;
+      margin-top: 5px;
+      color: var(--admin-muted);
+      font-size: 12px;
+    }
+
+    .heroes-toolbar-actions {
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+
+    .heroes-filters {
+      display: grid;
+      grid-template-columns:
+        minmax(220px, 1fr)
+        minmax(150px, 210px)
+        minmax(150px, 210px);
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--admin-line);
+      border-radius: 13px;
+      background: var(--admin-panel);
+    }
+
+    .heroes-filter-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .heroes-filter-field label {
+      color: #c8cfdd;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    /* =====================================================
+       GRADE COMPACTA
+    ===================================================== */
+
+    .heroes-list {
+      display: grid;
+      grid-template-columns:
+        repeat(auto-fill, minmax(245px, 1fr));
+      gap: 11px;
+      align-items: stretch;
+    }
+
+    .hero-card {
+      min-width: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows:
+        150px
+        minmax(0, 1fr);
+      border: 1px solid var(--admin-line);
+      border-radius: 12px;
+      background: var(--admin-panel);
+      transition:
+        transform 0.16s ease,
+        border-color 0.16s ease,
+        box-shadow 0.16s ease;
+    }
+
+    .hero-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(139, 92, 246, 0.5);
+      box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-card-media {
+      position: relative;
+      height: 150px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-bottom: 1px solid var(--admin-line);
+      background:
+        radial-gradient(
+          circle at 50% 38%,
+          rgba(139, 92, 246, 0.18),
+          transparent 52%
+        ),
+        #07101f;
+    }
+
+    .hero-card-media img {
+      width: 100%;
+      height: 100%;
+      padding: 5px;
+      object-fit: contain;
+    }
+
+    .hero-card-media-empty {
+      color: var(--admin-muted);
+      font-size: 10px;
+    }
+
+    .hero-card-status {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 4px 7px;
+      border: 1px solid #28613c;
+      border-radius: 999px;
+      background: rgba(11, 47, 27, 0.92);
+      color: #7ef0a5;
+      font-size: 7px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      backdrop-filter: blur(5px);
+    }
+
+    .hero-card-status.is-inactive {
+      border-color: #70414a;
+      background: rgba(54, 22, 28, 0.94);
+      color: #ff9aaa;
+    }
+
+    .hero-card-body {
+      min-width: 0;
+      display: grid;
+      grid-template-rows:
+        auto
+        auto
+        auto;
+      align-content: start;
+      gap: 9px;
+      padding: 11px;
+    }
+
+    .hero-card-heading {
+      min-width: 0;
+    }
+
+    .hero-card-heading h2 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hero-card-heading p {
+      margin: 4px 0 0;
+      overflow: hidden;
+      color: var(--admin-muted);
+      font-size: 9px;
+      line-height: 1.3;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .hero-card-meta {
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .hero-card-meta-item {
+      min-width: 0;
+      padding: 7px 8px;
+      border: 1px solid var(--admin-line);
+      border-radius: 8px;
+      background: #09111f;
+    }
+
+    .hero-card-meta-item span {
+      display: block;
+      color: var(--admin-muted);
+      font-size: 7px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .hero-card-meta-item strong {
+      display: block;
+      margin-top: 3px;
+      font-size: 10px;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hero-card-actions {
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .hero-card-actions .admin-button {
+      justify-content: center;
+      min-width: 0;
+      min-height: 33px;
+      padding: 7px 8px;
+      border-radius: 8px;
+      font-size: 9px;
+      text-align: center;
+    }
+
+    .hero-card-actions .danger {
+      color: #ff9aaa;
+      border-color: #71303b;
+      background: #2a1016;
+    }
+
+    .hero-card-actions .danger:hover {
+      border-color: #9a3f4e;
+      background: #38141c;
+    }
+
+    .heroes-message {
+      min-height: 20px;
+      color: var(--admin-muted);
+      font-size: 12px;
+    }
+
+    .heroes-message.error {
+      color: #ff8585;
+    }
+
+    .heroes-message.ok {
+      color: #4ade80;
+    }
+
+    .heroes-empty {
+      grid-column: 1 / -1;
+      padding: 32px;
+      border: 1px dashed var(--admin-line);
+      border-radius: 13px;
+      background: var(--admin-panel);
+      color: var(--admin-muted);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    /* =====================================================
+       RESPONSIVIDADE
+    ===================================================== */
+
+    @media (min-width: 1550px) {
+      .heroes-list {
+        grid-template-columns:
+          repeat(auto-fill, minmax(230px, 1fr));
+      }
+    }
+
+    @media (max-width: 1050px) {
+      .heroes-list {
+        grid-template-columns:
+          repeat(auto-fill, minmax(225px, 1fr));
+      }
+    }
+
+    @media (max-width: 780px) {
+      .heroes-filters {
+        grid-template-columns: 1fr;
+      }
+
+      .heroes-toolbar-actions {
+        width: 100%;
+      }
+
+      .heroes-toolbar-actions .admin-button {
+        flex: 1 1 100%;
+        justify-content: center;
+      }
+
+      .heroes-list {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .heroes-list {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card {
+        grid-template-columns:
+          102px
+          minmax(0, 1fr);
+        grid-template-rows: auto;
+      }
+
+      .hero-card-media {
+        width: 102px;
+        height: 100%;
+        min-height: 170px;
+        border-right: 1px solid var(--admin-line);
+        border-bottom: 0;
+      }
+
+      .hero-card-body {
+        padding: 10px;
+      }
+
+      .hero-card-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card-actions {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 390px) {
+      .hero-card {
+        grid-template-columns: 88px minmax(0, 1fr);
+      }
+
+      .hero-card-media {
+        width: 88px;
+      }
+
+      .hero-card-actions {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div data-admin-content>
+    <section class="heroes-page">
+
+      <header class="heroes-toolbar">
+        <div class="heroes-toolbar-copy">
+          <strong>
+            Gerenciamento de heróis
+          </strong>
+
+          <span>
+            Consulte, edite, ative ou remova heróis cadastrados.
+          </span>
+        </div>
+
+        <div class="heroes-toolbar-actions">
+          <a
+            class="admin-button primary"
+            href="./hero-editor.html"
+          >
+            Novo herói
+          </a>
+        </div>
+      </header>
+
+      <section class="heroes-filters">
+        <div class="heroes-filter-field">
+          <label for="search">
+            Buscar
+          </label>
+
+          <input
+            id="search"
+            class="admin-input"
+            type="search"
+            placeholder="Nome ou identificador..."
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="heroes-filter-field">
+          <label for="status-filter">
+            Publicação
+          </label>
+
+          <select
+            id="status-filter"
+            class="admin-select"
+          >
+            <option value="all">
+              Todos
+            </option>
+
+            <option value="active">
+              Ativos
+            </option>
+
+            <option value="inactive">
+              Inativos
+            </option>
+          </select>
+        </div>
+
+        <div class="heroes-filter-field">
+          <label for="sort-filter">
+            Ordenar
+          </label>
+
+          <select
+            id="sort-filter"
+            class="admin-select"
+          >
+            <option value="display_order">
+              Ordem de exibição
+            </option>
+
+            <option value="name">
+              Nome
+            </option>
+
+            <option value="status">
+              Status
+            </option>
+          </select>
+        </div>
+      </section>
+
+      <div
+        id="message"
+        class="heroes-message"
+        role="status"
+        aria-live="polite"
+      ></div>
+
+      <section
+        id="heroes-list"
+        class="heroes-list"
+      >
+        <div class="heroes-empty">
+          Carregando heróis...
+        </div>
+      </section>
+    </section>
+  </div>
+
+  <script type="module">
+    import {
+      initAdminShell
+    } from './js/admin-shell.js';
+
+    const shell =
+      await initAdminShell({
+        activeId: 'heroes-list',
+        pageTitle: 'Heróis',
+        pageSubtitle: 'Gerenciamento de conteúdo'
+      });
+
+    if (shell) {
+      await import(
+        './js/heroes.js?v=1400'
+      );
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Dashboard — Echo Arena Admin</title>
+
+  <link
+    rel="stylesheet"
+    href="./css/admin.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="./css/admin-shell.css"
+  >
+
+  <style>
+    .dashboard-page {
+      display: grid;
+      gap: 20px;
+    }
+
+    .dashboard-welcome {
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns:
+        minmax(0, 1.4fr)
+        minmax(280px, 0.6fr);
+      gap: 24px;
+      align-items: center;
+      min-height: 220px;
+      padding: 28px;
+      border: 1px solid var(--admin-line);
+      border-radius: 18px;
+      background:
+        radial-gradient(
+          circle at 85% 35%,
+          rgba(139, 92, 246, 0.28),
+          transparent 32%
+        ),
+        radial-gradient(
+          circle at 72% 100%,
+          rgba(64, 125, 255, 0.16),
+          transparent 34%
+        ),
+        linear-gradient(
+          135deg,
+          #111a30,
+          #0b1221
+        );
+    }
+
+    .dashboard-welcome::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(
+          115deg,
+          transparent 0 58%,
+          rgba(255, 255, 255, 0.025) 58% 59%,
+          transparent 59% 100%
+        );
+    }
+
+    .dashboard-welcome-copy {
+      position: relative;
+      z-index: 1;
+      max-width: 720px;
+    }
+
+    .dashboard-eyebrow {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--admin-purple);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .dashboard-welcome h2 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.04;
+    }
+
+    .dashboard-welcome p {
+      max-width: 620px;
+      margin: 12px 0 0;
+      color: var(--admin-muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .dashboard-welcome-actions {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .dashboard-welcome-actions .admin-button {
+      justify-content: center;
+      min-height: 46px;
+      text-align: center;
+    }
+
+    .dashboard-message {
+      display: none;
+      min-height: 22px;
+      padding: 13px 15px;
+      border: 1px solid var(--admin-line);
+      border-radius: 11px;
+      background: var(--admin-panel);
+      color: var(--admin-muted);
+      font-size: 12px;
+    }
+
+    .dashboard-message.is-visible {
+      display: block;
+    }
+
+    .dashboard-message.error {
+      color: #ffb4bd;
+      border-color: #71303b;
+      background: #2a1016;
+    }
+
+    .dashboard-message.ok {
+      color: #8bf0aa;
+      border-color: #28613c;
+      background: #0c2918;
+    }
+
+    .dashboard-metrics {
+      display: grid;
+      grid-template-columns:
+        repeat(6, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .dashboard-metric {
+      position: relative;
+      min-width: 0;
+      overflow: hidden;
+      padding: 18px;
+      border: 1px solid var(--admin-line);
+      border-radius: 14px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.018),
+          transparent
+        ),
+        var(--admin-panel);
+      text-decoration: none;
+      color: inherit;
+      transition:
+        transform 0.18s ease,
+        border-color 0.18s ease,
+        background 0.18s ease;
+    }
+
+    .dashboard-metric:hover {
+      transform: translateY(-2px);
+      border-color: rgba(139, 92, 246, 0.55);
+      background:
+        radial-gradient(
+          circle at top right,
+          rgba(139, 92, 246, 0.13),
+          transparent 45%
+        ),
+        var(--admin-panel);
+    }
+
+    .dashboard-metric::after {
+      content: "";
+      position: absolute;
+      top: -30px;
+      right: -30px;
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: rgba(139, 92, 246, 0.08);
+    }
+
+    .dashboard-metric-label {
+      position: relative;
+      z-index: 1;
+      display: block;
+      color: var(--admin-muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .dashboard-metric strong {
+      position: relative;
+      z-index: 1;
+      display: block;
+      margin: 10px 0 5px;
+      font-size: 34px;
+      line-height: 1;
+    }
+
+    .dashboard-metric small {
+      position: relative;
+      z-index: 1;
+      display: block;
+      color: #758098;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .dashboard-content-grid {
+      display: grid;
+      grid-template-columns:
+        minmax(0, 1.25fr)
+        minmax(320px, 0.75fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .dashboard-column {
+      display: grid;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .dashboard-panel {
+      min-width: 0;
+      padding: 18px;
+      border: 1px solid var(--admin-line);
+      border-radius: 14px;
+      background: var(--admin-panel);
+    }
+
+    .dashboard-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 15px;
+    }
+
+    .dashboard-panel-header h3 {
+      margin: 4px 0 0;
+      font-size: 19px;
+    }
+
+    .dashboard-panel-header a {
+      color: #b99eff;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .dashboard-panel-header a:hover {
+      text-decoration: underline;
+    }
+
+    .dashboard-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .dashboard-list-item {
+      display: grid;
+      grid-template-columns:
+        minmax(0, 1fr)
+        auto;
+      gap: 12px;
+      align-items: center;
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid #22304a;
+      border-radius: 10px;
+      background: #09111f;
+    }
+
+    .dashboard-list-item-main {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
+
+    .dashboard-list-image {
+      flex: 0 0 52px;
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--admin-line);
+      border-radius: 9px;
+      background: #050a12;
+      color: var(--admin-muted);
+      font-size: 8px;
+      text-align: center;
+    }
+
+    .dashboard-list-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .dashboard-list-copy {
+      min-width: 0;
+    }
+
+    .dashboard-list-title {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .dashboard-list-title > span:first-child {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .dashboard-list-subtitle {
+      margin-top: 4px;
+      overflow: hidden;
+      color: var(--admin-muted);
+      font-size: 9.5px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .dashboard-list-actions {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .dashboard-list-actions .admin-button {
+      min-height: 34px;
+      padding: 7px 10px;
+      font-size: 10px;
+    }
+
+    .dashboard-badge {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      min-height: 20px;
+      padding: 3px 7px;
+      border: 1px solid #3c3266;
+      border-radius: 999px;
+      background: #1d1638;
+      color: #c9b7ff;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .dashboard-badge.inactive {
+      color: #ff9aaa;
+      border-color: #71303b;
+      background: #2a1016;
+    }
+
+    .dashboard-badge.warning {
+      color: #ffd76d;
+      border-color: #6f5618;
+      background: #2a2009;
+    }
+
+    .dashboard-empty {
+      padding: 24px;
+      border: 1px dashed var(--admin-line);
+      border-radius: 10px;
+      color: var(--admin-muted);
+      font-size: 11px;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .dashboard-quick-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .dashboard-quick-card {
+      display: grid;
+      align-content: space-between;
+      gap: 18px;
+      min-height: 125px;
+      padding: 15px;
+      border: 1px solid var(--admin-line);
+      border-radius: 12px;
+      background:
+        linear-gradient(
+          145deg,
+          rgba(139, 92, 246, 0.08),
+          transparent 65%
+        ),
+        #09111f;
+      color: inherit;
+      text-decoration: none;
+      transition:
+        border-color 0.18s ease,
+        transform 0.18s ease;
+    }
+
+    .dashboard-quick-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(139, 92, 246, 0.6);
+    }
+
+    .dashboard-quick-card strong {
+      display: block;
+      font-size: 13px;
+    }
+
+    .dashboard-quick-card span {
+      display: block;
+      margin-top: 6px;
+      color: var(--admin-muted);
+      font-size: 9.5px;
+      line-height: 1.5;
+    }
+
+    .dashboard-quick-card small {
+      color: #b99eff;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .dashboard-status-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .dashboard-status-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 12px;
+      border: 1px solid #22304a;
+      border-radius: 9px;
+      background: #09111f;
+    }
+
+    .dashboard-status-item span {
+      color: var(--admin-muted);
+      font-size: 10px;
+    }
+
+    .dashboard-status-item strong {
+      font-size: 11px;
+    }
+
+    .dashboard-status-dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      margin-right: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+      box-shadow: 0 0 10px rgba(74, 222, 128, 0.5);
+    }
+
+    @media (max-width: 1280px) {
+      .dashboard-metrics {
+        grid-template-columns:
+          repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 1050px) {
+      .dashboard-welcome {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-welcome-actions {
+        max-width: 560px;
+      }
+
+      .dashboard-content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .dashboard-welcome {
+        padding: 20px;
+      }
+
+      .dashboard-welcome-actions,
+      .dashboard-quick-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-metrics {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+      }
+
+      .dashboard-list-item {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-list-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .dashboard-metrics {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div data-admin-content>
+    <section class="dashboard-page">
+
+      <section class="dashboard-welcome">
+        <div class="dashboard-welcome-copy">
+          <span class="dashboard-eyebrow">
+            Central administrativa
+          </span>
+
+          <h2>
+            Gerencie todo o conteúdo do Echo Arena
+          </h2>
+
+          <p>
+            Consulte heróis, equipamentos, estatísticas, builds e
+            informações da comunidade em um único painel organizado.
+          </p>
+        </div>
+
+        <div class="dashboard-welcome-actions">
+          <a
+            class="admin-button primary"
+            href="./hero-editor.html"
+          >
+            Novo herói
+          </a>
+
+          <a
+            class="admin-button"
+            href="./equipment-editor.html"
+          >
+            Novo equipamento
+          </a>
+
+          <a
+            class="admin-button"
+            href="./hero-stats.html"
+          >
+            Status dos heróis
+          </a>
+
+        </div>
+      </section>
+
+      <div
+        id="dashboard-message"
+        class="dashboard-message"
+        role="status"
+        aria-live="polite"
+      ></div>
+
+      <section class="dashboard-metrics">
+        <a
+          class="dashboard-metric"
+          href="./heroes.html"
+        >
+          <span class="dashboard-metric-label">
+            Heróis
+          </span>
+
+          <strong id="metric-heroes">
+            —
+          </strong>
+
+          <small>
+            cadastrados
+          </small>
+        </a>
+
+        <a
+          class="dashboard-metric"
+          href="./equipments.html"
+        >
+          <span class="dashboard-metric-label">
+            Equipamentos
+          </span>
+
+          <strong id="metric-equipments">
+            —
+          </strong>
+
+          <small>
+            cadastrados
+          </small>
+        </a>
+
+        <a
+          class="dashboard-metric"
+          href="./builds.html"
+        >
+          <span class="dashboard-metric-label">
+            Builds
+          </span>
+
+          <strong id="metric-builds">
+            —
+          </strong>
+
+          <small>
+            criadas
+          </small>
+        </a>
+
+        <a
+          class="dashboard-metric"
+          href="./users.html"
+        >
+          <span class="dashboard-metric-label">
+            Usuários
+          </span>
+
+          <strong id="metric-users">
+            —
+          </strong>
+
+          <small>
+            perfis
+          </small>
+        </a>
+
+        <a
+          class="dashboard-metric"
+          href="./comments.html"
+        >
+          <span class="dashboard-metric-label">
+            Comentários
+          </span>
+
+          <strong id="metric-comments">
+            —
+          </strong>
+
+          <small>
+            registrados
+          </small>
+        </a>
+
+        <a
+          class="dashboard-metric"
+          href="./users.html?filter=blocked"
+        >
+          <span class="dashboard-metric-label">
+            Bloqueados
+          </span>
+
+          <strong id="metric-blocked">
+            —
+          </strong>
+
+          <small>
+            usuários
+          </small>
+        </a>
+      </section>
+
+      <section class="dashboard-content-grid">
+
+        <div class="dashboard-column">
+
+          <article class="dashboard-panel">
+            <header class="dashboard-panel-header">
+              <div>
+                <span class="dashboard-eyebrow">
+                  Conteúdo
+                </span>
+
+                <h3>
+                  Heróis recentes
+                </h3>
+              </div>
+
+              <a href="./heroes.html">
+                Ver todos
+              </a>
+            </header>
+
+            <div
+              id="recent-heroes"
+              class="dashboard-list"
+            >
+              <div class="dashboard-empty">
+                Carregando heróis...
+              </div>
+            </div>
+          </article>
+
+          <article class="dashboard-panel">
+            <header class="dashboard-panel-header">
+              <div>
+                <span class="dashboard-eyebrow">
+                  Inventário
+                </span>
+
+                <h3>
+                  Equipamentos recentes
+                </h3>
+              </div>
+
+              <a href="./equipments.html">
+                Ver todos
+              </a>
+            </header>
+
+            <div
+              id="recent-equipments"
+              class="dashboard-list"
+            >
+              <div class="dashboard-empty">
+                Carregando equipamentos...
+              </div>
+            </div>
+          </article>
+
+          <article class="dashboard-panel">
+            <header class="dashboard-panel-header">
+              <div>
+                <span class="dashboard-eyebrow">
+                  Comunidade
+                </span>
+
+                <h3>
+                  Builds recentes
+                </h3>
+              </div>
+
+              <a href="./builds.html">
+                Ver todas
+              </a>
+            </header>
+
+            <div
+              id="recent-builds"
+              class="dashboard-list"
+            >
+              <div class="dashboard-empty">
+                Carregando builds...
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <aside class="dashboard-column">
+
+          <article class="dashboard-panel">
+            <header class="dashboard-panel-header">
+              <div>
+                <span class="dashboard-eyebrow">
+                  Acesso rápido
+                </span>
+
+                <h3>
+                  Ferramentas
+                </h3>
+              </div>
+            </header>
+
+            <div class="dashboard-quick-grid">
+              <a
+                class="dashboard-quick-card"
+                href="./hero-editor.html"
+              >
+                <div>
+                  <strong>
+                    Cadastrar herói
+                  </strong>
+
+                  <span>
+                    Identidade, mídia e publicação.
+                  </span>
+                </div>
+
+                <small>
+                  Abrir editor
+                </small>
+              </a>
+
+              <a
+                class="dashboard-quick-card"
+                href="./hero-stats.html"
+              >
+                <div>
+                  <strong>
+                    Atualizar status
+                  </strong>
+
+                  <span>
+                    Vida, armadura e dados da arma.
+                  </span>
+                </div>
+
+                <small>
+                  Abrir status
+                </small>
+              </a>
+
+              <a
+                class="dashboard-quick-card"
+                href="./equipment-editor.html"
+              >
+                <div>
+                  <strong>
+                    Novo equipamento
+                  </strong>
+
+                  <span>
+                    Cadastre equipamentos manualmente.
+                  </span>
+                </div>
+
+                <small>
+                  Abrir editor
+                </small>
+              </a>
+
+              
+            </div>
+          </article>
+
+          <article class="dashboard-panel">
+            <header class="dashboard-panel-header">
+              <div>
+                <span class="dashboard-eyebrow">
+                  Sistema
+                </span>
+
+                <h3>
+                  Estado dos módulos
+                </h3>
+              </div>
+            </header>
+
+            <div class="dashboard-status-list">
+              <div class="dashboard-status-item">
+                <span>
+                  <i class="dashboard-status-dot"></i>
+                  Admin Shell
+                </span>
+
+                <strong>
+                  Ativo
+                </strong>
+              </div>
+
+              <div class="dashboard-status-item">
+                <span>
+                  <i class="dashboard-status-dot"></i>
+                  Heróis
+                </span>
+
+                <strong>
+                  Integrado
+                </strong>
+              </div>
+
+              <div class="dashboard-status-item">
+                <span>
+                  <i class="dashboard-status-dot"></i>
+                  Status dinâmicos
+                </span>
+
+                <strong>
+                  Integrado
+                </strong>
+              </div>
+
+              <div class="dashboard-status-item">
+                <span>
+                  <i class="dashboard-status-dot"></i>
+                  Equipamentos
+                </span>
+
+                <strong>
+                  Integrado
+                </strong>
+              </div>
+            </div>
+          </article>
+
+          <article class="dashboard-panel">
+            <header class="dashboard-panel-header">
+              <div>
+                <span class="dashboard-eyebrow">
+                  Moderação
+                </span>
+
+                <h3>
+                  Comentários recentes
+                </h3>
+              </div>
+
+              <a href="./comments.html">
+                Ver todos
+              </a>
+            </header>
+
+            <div
+              id="recent-comments"
+              class="dashboard-list"
+            >
+              <div class="dashboard-empty">
+                Carregando comentários...
+              </div>
+            </div>
+          </article>
+        </aside>
+      </section>
+    </section>
+  </div>
+
+  <script type="module">
+    import {
+      initAdminShell
+    } from './js/admin-shell.js';
+
+    const shell =
+      await initAdminShell({
+        activeId: 'dashboard',
+        pageTitle: 'Dashboard',
+        pageSubtitle: 'Visão geral do sistema'
+      });
+
+    if (shell) {
+      await import(
+        './js/dashboard.js'
+      );
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1578 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Editor de equipamento — Echo Arena Admin</title>
+
+  <link
+    rel="stylesheet"
+    href="./css/admin.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="./css/admin-shell.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="./css/equipments.css"
+  >
+
+  <style>
+    /* =====================================================
+       ESTRUTURA GERAL
+    ===================================================== */
+
+    .equipment-editor {
+      display: grid;
+      gap: 18px;
+    }
+
+    .equipment-editor-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .equipment-editor-toolbar-copy strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    .equipment-editor-toolbar-copy span {
+      display: block;
+      margin-top: 5px;
+      color: var(--admin-muted);
+      font-size: 12px;
+    }
+
+    .equipment-editor-toolbar-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .equipment-editor-tabs {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding: 7px;
+      border: 1px solid var(--admin-line);
+      border-radius: 13px;
+      background: var(--admin-panel-2);
+      scrollbar-width: thin;
+    }
+
+    .equipment-editor-tab {
+      flex: 0 0 auto;
+      min-height: 42px;
+      padding: 10px 15px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--admin-muted);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .equipment-editor-tab:hover {
+      color: white;
+      background: #17213a;
+    }
+
+    .equipment-editor-tab.is-active {
+      color: white;
+      background: linear-gradient(
+        180deg,
+        var(--admin-purple),
+        var(--admin-purple-dark)
+      );
+    }
+
+    .equipment-editor-panel {
+      display: none;
+    }
+
+    .equipment-editor-panel.is-active {
+      display: block;
+    }
+
+    .equipment-form-card {
+      padding: 20px;
+      border: 1px solid var(--admin-line);
+      border-radius: 14px;
+      background: var(--admin-panel);
+    }
+
+    .equipment-section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .equipment-section-heading h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .equipment-section-heading p {
+      margin: 6px 0 0;
+      color: var(--admin-muted);
+      font-size: 12px;
+    }
+
+    /* =====================================================
+       INFORMAÇÕES
+    ===================================================== */
+
+    .equipment-form-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap: 15px;
+    }
+
+    .equipment-form-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .equipment-form-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .equipment-form-field label,
+    .equipment-media-field label {
+      color: #c8cfdd;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .equipment-checkbox-field {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid var(--admin-line);
+      border-radius: 9px;
+      background: #08101e;
+    }
+
+    .equipment-checkbox-field input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+    }
+
+    /* =====================================================
+       MÍDIA
+    ===================================================== */
+
+    .equipment-media-layout {
+      display: grid;
+      grid-template-columns:
+        minmax(260px, 0.65fr)
+        minmax(0, 1.35fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .equipment-media-field {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--admin-line);
+      border-radius: 12px;
+      background: #09111f;
+    }
+
+    .preview-large {
+      position: relative;
+      width: min(280px, 100%);
+      aspect-ratio: 1 / 1;
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--admin-line);
+      border-radius: 14px;
+      background:
+        radial-gradient(
+          circle at 50% 45%,
+          rgba(139, 92, 246, 0.18),
+          transparent 50%
+        ),
+        #050a12;
+      color: var(--admin-muted);
+    }
+
+    .preview-large img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+
+    .preview-large::before {
+      content: '';
+      position: absolute;
+      inset: 8%;
+      z-index: 2;
+      pointer-events: none;
+      border: 1px dashed rgba(255, 255, 255, 0.34);
+      border-radius: 8px;
+    }
+
+    .preview-large::after {
+      content: 'ÁREA SEGURA DO CARD';
+      position: absolute;
+      z-index: 3;
+      left: 50%;
+      bottom: 10%;
+      transform: translateX(-50%);
+      padding: 4px 7px;
+      border-radius: 6px;
+      background: rgba(2, 6, 15, 0.78);
+      color: #cbd5e1;
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .equipment-media-preview-panel {
+      display: grid;
+      grid-template-columns: minmax(210px, 280px) minmax(210px, 1fr);
+      gap: 18px;
+      padding: 16px;
+      border: 1px solid var(--admin-line);
+      border-radius: 14px;
+      background: #09111f;
+    }
+
+    .equipment-preview-block {
+      min-width: 0;
+    }
+
+    .equipment-preview-block > strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #f8fafc;
+      font-size: 13px;
+    }
+
+    .equipment-preview-block > p {
+      min-height: 34px;
+      margin: 0 0 12px;
+      color: var(--admin-muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .preview-full-image {
+      height: 280px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--admin-line);
+      border-radius: 12px;
+      background:
+        linear-gradient(45deg, #101827 25%, transparent 25%),
+        linear-gradient(-45deg, #101827 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #101827 75%),
+        linear-gradient(-45deg, transparent 75%, #101827 75%),
+        #080f1c;
+      background-size: 18px 18px;
+      background-position: 0 0, 0 9px, 9px -9px, -9px 0;
+      color: var(--admin-muted);
+      font-size: 12px;
+    }
+
+    .preview-full-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .equipment-media-tip {
+      margin-top: 12px;
+      padding: 11px 13px;
+      border: 1px solid #4c3a78;
+      border-radius: 10px;
+      background: rgba(124, 58, 237, 0.09);
+      color: #c8b8ee;
+      font-size: 11px;
+      line-height: 1.55;
+    }
+
+    .equipment-crop-controls {
+      display: grid;
+      gap: 10px;
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid #26344d;
+      border-radius: 10px;
+      background: #07101d;
+    }
+
+    .equipment-crop-control {
+      display: grid;
+      grid-template-columns: 72px 1fr 42px;
+      gap: 9px;
+      align-items: center;
+      color: #aeb9cb;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .equipment-crop-control input {
+      width: 100%;
+      accent-color: #8b5cf6;
+    }
+
+    .equipment-crop-control output {
+      color: #e7ecf5;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .equipment-crop-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .equipment-crop-status {
+      color: #91a0b5;
+      font-size: 9px;
+    }
+
+    @media (max-width: 980px) {
+      .equipment-media-layout,
+      .equipment-media-preview-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-large {
+        width: min(260px, 100%);
+      }
+
+      .preview-full-image {
+        height: 240px;
+      }
+    }
+
+    /* =====================================================
+       IMPORTAÇÃO
+    ===================================================== */
+
+    .eq-import-banner,
+    .eq-import-summary {
+      display: none;
+    }
+
+    .eq-import-banner.is-visible {
+      display: flex;
+    }
+
+    .eq-import-summary.is-visible {
+      display: block;
+    }
+
+    .eq-import-banner {
+      gap: 12px;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 14px;
+      border: 1px solid #6f5618;
+      border-radius: 12px;
+      background: #2a2009;
+      color: #ffd76d;
+    }
+
+    .eq-import-banner strong {
+      display: block;
+      font-size: 13px;
+    }
+
+    .eq-import-banner span {
+      display: block;
+      margin-top: 5px;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .eq-import-banner-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex: 0 0 auto;
+    }
+
+    .eq-import-summary {
+      padding: 14px;
+      border: 1px solid var(--admin-line);
+      border-radius: 12px;
+      background: #09111f;
+    }
+
+    .eq-import-summary h3 {
+      margin: 0 0 10px;
+      font-size: 14px;
+    }
+
+    .eq-import-summary-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .eq-import-summary-grid div {
+      padding: 10px;
+      border: 1px solid #1f2b42;
+      border-radius: 9px;
+      background: #07101d;
+    }
+
+    .eq-import-summary-grid small {
+      display: block;
+      color: #65718a;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .eq-import-summary-grid strong {
+      display: block;
+      margin-top: 4px;
+      color: #d7ddeb;
+      font-size: 15px;
+    }
+
+    .eq-import-warning-list {
+      display: grid;
+      gap: 7px;
+      margin-top: 10px;
+    }
+
+    .eq-import-warning {
+      padding: 9px 10px;
+      border: 1px solid #6f5618;
+      border-radius: 8px;
+      background: #2a2009;
+      color: #ffd76d;
+      font-size: 10.5px;
+      line-height: 1.5;
+    }
+
+    .equipment-change-review {
+      display: none;
+      padding: 16px;
+      border: 1px solid #3a4964;
+      border-radius: 14px;
+      background: #081321;
+    }
+
+    .equipment-change-review.is-visible { display: block; }
+    .equipment-change-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 14px; flex-wrap: wrap; }
+    .equipment-change-head h3 { margin: 0; color: #f8fafc; font-size: 18px; }
+    .equipment-change-head p { margin: 5px 0 0; color: var(--admin-muted); font-size: 11px; }
+    .equipment-change-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 16px; }
+    .equipment-change-stat { padding: 11px; border: 1px solid #26344d; border-radius: 10px; background: #07101d; }
+    .equipment-change-stat strong { display: block; color: #f8fafc; font-size: 20px; }
+    .equipment-change-stat small { color: #7e8ca4; font-size: 8px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .equipment-change-group { margin-top: 14px; }
+    .equipment-change-group h4 { margin: 0 0 7px; color: #94a3b8; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+    .equipment-change-row { display: grid; grid-template-columns: minmax(130px, .55fr) minmax(0, 1.45fr); gap: 12px; padding: 11px 12px; border: 1px solid #26344d; border-radius: 9px; background: #091525; margin-top: 7px; }
+    .equipment-change-row > strong { color: #e7ecf5; font-size: 11px; }
+    .equipment-change-values { display: grid; grid-template-columns: 1fr auto 1fr; gap: 9px; align-items: center; min-width: 0; font-size: 11px; }
+    .equipment-change-before, .equipment-change-after { padding: 7px 8px; border-radius: 7px; word-break: break-word; }
+    .equipment-change-before { background: rgba(239,68,68,.09); color: #fda4af; }
+    .equipment-change-after { background: rgba(34,197,94,.09); color: #86efac; }
+    .equipment-change-arrow { color: #64748b; font-weight: 900; }
+    .equipment-change-empty { padding: 30px 12px; text-align: center; color: #9aa7ba; font-size: 12px; }
+
+    @media (max-width: 760px) {
+      .equipment-change-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .equipment-change-row, .equipment-change-values { grid-template-columns: 1fr; }
+      .equipment-change-arrow { transform: rotate(90deg); justify-self: center; }
+    }
+
+    /* =====================================================
+       RARIDADES — VISUAL COMPACTO E PROFISSIONAL
+
+       Mantém as classes e a estrutura esperadas pelo
+       equipment-editor.js. A alteração é somente visual.
+    ===================================================== */
+
+    #rarities {
+      display: grid;
+      gap: 8px;
+    }
+
+    .rarity-card {
+      position: relative;
+      display: grid;
+      grid-template-columns:
+        minmax(130px, 0.18fr)
+        minmax(0, 0.82fr);
+      gap: 14px;
+      align-items: center;
+      min-height: 68px;
+      padding: 10px 12px;
+      overflow: hidden;
+      border: 1px solid #26344f;
+      border-radius: 11px;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.025),
+          transparent 34%
+        ),
+        #09111f;
+      transition:
+        border-color 0.18s ease,
+        background 0.18s ease,
+        transform 0.18s ease;
+    }
+
+    .rarity-card:hover {
+      border-color: #3b4d70;
+      background:
+        linear-gradient(
+          90deg,
+          rgba(139, 92, 246, 0.06),
+          transparent 38%
+        ),
+        #0a1424;
+    }
+
+    .rarity-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 3px;
+      background: currentColor;
+      opacity: 0.72;
+    }
+
+    .rarity-head {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 10px;
+      margin: 0;
+      padding: 0 6px 0 4px;
+    }
+
+    .rarity-title {
+      min-width: 0;
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .rarity-head > button {
+      margin-left: auto;
+      min-height: 34px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .attrs {
+      min-width: 0;
+      display: grid;
+      gap: 7px;
+    }
+
+    .attr-row {
+      min-width: 0;
+      display: grid;
+      grid-template-columns:
+        minmax(180px, 1fr)
+        minmax(110px, 0.32fr)
+        38px;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .attr-row input {
+      width: 100%;
+      min-width: 0;
+      min-height: 36px;
+      padding: 8px 10px;
+      border: 1px solid #26344f;
+      border-radius: 8px;
+      background: #050c18;
+      color: white;
+      font-size: 11px;
+      outline: none;
+    }
+
+    .attr-row input:focus {
+      border-color: var(--admin-purple);
+      box-shadow:
+        0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+
+    .attr-row .danger,
+    .attr-row button {
+      width: 38px;
+      min-width: 38px;
+      min-height: 36px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .rarity-card:has(.attr-row:nth-child(2)) {
+      align-items: start;
+    }
+
+    .rarity-card:has(.attr-row:nth-child(2)) .rarity-head {
+      padding-top: 2px;
+    }
+
+    /* Cabeçalho discreto, somente em telas largas */
+    .rarities-column-guide {
+      display: grid;
+      grid-template-columns:
+        minmax(130px, 0.18fr)
+        minmax(0, 0.82fr);
+      gap: 14px;
+      padding: 0 13px 3px;
+      color: #65718a;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .rarities-column-guide-right {
+      display: grid;
+      grid-template-columns:
+        minmax(180px, 1fr)
+        minmax(110px, 0.32fr)
+        38px;
+      gap: 7px;
+    }
+
+    /* =====================================================
+       BÔNUS
+    ===================================================== */
+
+    #bonuses {
+      display: grid;
+      gap: 12px;
+    }
+
+    .set-bonus-row {
+      display: grid;
+      grid-template-columns:
+        110px
+        minmax(180px, 0.45fr)
+        minmax(0, 1fr)
+        auto;
+      gap: 9px;
+      padding: 14px;
+      border: 1px solid var(--admin-line);
+      border-radius: 12px;
+      background: #09111f;
+    }
+
+    .set-bonus-row input {
+      width: 100%;
+      min-height: 42px;
+      padding: 10px 12px;
+      border: 1px solid var(--admin-line);
+      border-radius: 8px;
+      background: #050c18;
+      color: white;
+    }
+
+    /* =====================================================
+       PRÉVIA E MENSAGENS
+    ===================================================== */
+
+    .equipment-preview-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .equipment-preview-item {
+      padding: 13px;
+      border: 1px solid var(--admin-line);
+      border-radius: 10px;
+      background: #09111f;
+    }
+
+    .equipment-preview-item span {
+      display: block;
+      color: var(--admin-muted);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .equipment-preview-item strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 16px;
+      overflow-wrap: anywhere;
+    }
+
+    #message {
+      min-height: 22px;
+      color: var(--admin-muted);
+      font-size: 13px;
+    }
+
+    #message.error {
+      color: #ff8585;
+    }
+
+    #message.ok {
+      color: #4ade80;
+    }
+
+    /* =====================================================
+       RESPONSIVIDADE
+    ===================================================== */
+
+    @media (max-width: 1050px) {
+      .rarity-card {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .rarity-head {
+        padding: 0;
+      }
+
+      .rarities-column-guide {
+        display: none;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .equipment-media-layout,
+      .equipment-form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .equipment-form-field.full {
+        grid-column: auto;
+      }
+
+      .equipment-preview-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .equipment-editor-toolbar-actions {
+        width: 100%;
+      }
+
+      .equipment-editor-toolbar-actions .admin-button,
+      .equipment-editor-toolbar-actions button {
+        flex: 1 1 100%;
+        justify-content: center;
+      }
+
+      .eq-import-banner {
+        flex-direction: column;
+      }
+
+      .eq-import-summary-grid {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+      }
+
+      .rarity-card {
+        padding: 10px;
+      }
+
+      .rarity-head {
+        flex-wrap: wrap;
+      }
+
+      .rarity-head > button {
+        flex: 1 1 100%;
+        margin-left: 0;
+      }
+
+      .attr-row {
+        grid-template-columns:
+          minmax(0, 1fr)
+          minmax(92px, 0.38fr)
+          38px;
+      }
+
+      .set-bonus-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .attr-row {
+        grid-template-columns:
+          minmax(0, 1fr)
+          38px;
+      }
+
+      .attr-row input:nth-of-type(2) {
+        grid-column: 1 / 2;
+      }
+
+      .attr-row button {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        height: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div data-admin-content>
+    <form
+      id="form"
+      class="equipment-editor"
+    >
+      <header class="equipment-editor-toolbar">
+        <div class="equipment-editor-toolbar-copy">
+          <strong id="page-title">
+            Novo equipamento
+          </strong>
+
+          <span>
+            Cadastre informações, mídia, raridades e bônus.
+          </span>
+        </div>
+
+        <div class="equipment-editor-toolbar-actions">
+          <a
+            id="equipment-import-data-link"
+            class="admin-button"
+            href="./equipment-ai-import.html"
+          >
+            Importar dados
+          </a>
+
+          <a
+            class="admin-button"
+            href="./equipments.html"
+          >
+            Cancelar
+          </a>
+
+          <button
+            class="admin-button primary"
+            type="submit"
+          >
+            Salvar equipamento
+          </button>
+        </div>
+      </header>
+
+      <nav
+        class="equipment-editor-tabs"
+        aria-label="Seções do editor"
+      >
+        <button
+          type="button"
+          class="equipment-editor-tab is-active"
+          data-tab="general"
+        >
+          Informações
+        </button>
+
+        <button
+          type="button"
+          class="equipment-editor-tab"
+          data-tab="media"
+        >
+          Mídia
+        </button>
+
+        <button
+          type="button"
+          class="equipment-editor-tab"
+          data-tab="rarities"
+        >
+          Raridades
+        </button>
+
+        <button
+          type="button"
+          class="equipment-editor-tab"
+          data-tab="bonuses"
+        >
+          Bônus
+        </button>
+
+        <button
+          type="button"
+          class="equipment-editor-tab"
+          data-tab="preview"
+        >
+          Prévia
+        </button>
+      </nav>
+
+      <section
+        id="import-banner"
+        class="eq-import-banner"
+      >
+        <div>
+          <strong>
+            Dados importados aplicados ao formulário
+          </strong>
+
+          <span id="import-banner-text">
+            Revise todos os campos antes de salvar.
+          </span>
+        </div>
+
+        <div class="eq-import-banner-actions">
+          <button
+            id="undo-import"
+            type="button"
+            class="admin-button"
+          >
+            Desfazer preenchimento
+          </button>
+
+          <a
+            class="admin-button"
+            href="./equipment-ai-import.html"
+          >
+            Voltar ao importador
+          </a>
+        </div>
+      </section>
+
+      <section
+        id="import-summary"
+        class="eq-import-summary"
+      >
+        <h3>
+          Resumo da importação
+        </h3>
+
+        <div class="eq-import-summary-grid">
+          <div>
+            <small>Raridades</small>
+            <strong id="import-rarity-count">0</strong>
+          </div>
+
+          <div>
+            <small>Atributos</small>
+            <strong id="import-attribute-count">0</strong>
+          </div>
+
+          <div>
+            <small>Bônus</small>
+            <strong id="import-bonus-count">0</strong>
+          </div>
+
+          <div>
+            <small>Correspondências</small>
+            <strong id="import-match-count">0</strong>
+          </div>
+        </div>
+
+        <div
+          id="import-warnings"
+          class="eq-import-warning-list"
+        ></div>
+      </section>
+
+      <section
+        id="equipment-change-review"
+        class="equipment-change-review"
+        aria-live="polite"
+      ></section>
+
+      <!-- INFORMAÇÕES -->
+
+      <section
+        class="equipment-editor-panel is-active"
+        data-panel="general"
+      >
+        <article class="equipment-form-card">
+          <div class="equipment-section-heading">
+            <div>
+              <h2>Informações gerais</h2>
+
+              <p>
+                Dados principais utilizados no frontend.
+              </p>
+            </div>
+          </div>
+
+          <div class="equipment-form-grid">
+            <div class="equipment-form-field">
+              <label for="name">Nome</label>
+
+              <input
+                id="name"
+                class="admin-input"
+                required
+              >
+            </div>
+
+            <div class="equipment-form-field">
+              <label for="slug">Slug</label>
+
+              <input
+                id="slug"
+                class="admin-input"
+                required
+              >
+            </div>
+
+            <div class="equipment-form-field">
+              <label for="slot-id">Slot</label>
+
+              <select
+                id="slot-id"
+                class="admin-select"
+                required
+              >
+                <option value="">
+                  Selecione um slot
+                </option>
+              </select>
+            </div>
+
+            <div class="equipment-form-field">
+              <label for="display-order">Ordem</label>
+
+              <input
+                id="display-order"
+                class="admin-input"
+                type="number"
+                value="0"
+              >
+            </div>
+
+            <div class="equipment-form-field">
+              <label for="set-id">Conjunto</label>
+
+              <select
+                id="set-id"
+                class="admin-select"
+              >
+                <option value="">
+                  Sem conjunto
+                </option>
+              </select>
+            </div>
+
+            <div class="equipment-form-field">
+              <label for="new-set-name">
+                Novo conjunto
+              </label>
+
+              <input
+                id="new-set-name"
+                class="admin-input"
+                placeholder="Opcional"
+              >
+            </div>
+
+            <div class="equipment-form-field full">
+              <label for="description">Descrição</label>
+
+              <textarea
+                id="description"
+                class="admin-textarea"
+                rows="5"
+              ></textarea>
+            </div>
+
+            <div class="equipment-form-field full">
+              <label for="recommendation">
+                Indicação / recomendação
+              </label>
+
+              <textarea
+                id="recommendation"
+                class="admin-textarea"
+                rows="5"
+              ></textarea>
+            </div>
+
+            <div class="equipment-form-field">
+              <label>Publicação</label>
+
+              <label class="equipment-checkbox-field">
+                <input
+                  id="enabled"
+                  type="checkbox"
+                  checked
+                >
+
+                <span>
+                  Equipamento ativo e visível
+                </span>
+              </label>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- MÍDIA -->
+
+      <section
+        class="equipment-editor-panel"
+        data-panel="media"
+      >
+        <article class="equipment-form-card">
+          <div class="equipment-section-heading">
+            <div>
+              <h2>Mídia do equipamento</h2>
+
+              <p>
+                Selecione e confira a imagem antes de salvar.
+              </p>
+            </div>
+          </div>
+
+          <div class="equipment-media-layout">
+            <div class="equipment-media-field">
+              <label for="image-file">
+                Imagem do item
+              </label>
+
+              <input
+                id="image-file"
+                class="admin-input"
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+              >
+            </div>
+
+            <div>
+              <div class="equipment-media-preview-panel">
+                <div class="equipment-preview-block">
+                  <strong>Como aparecerá no frontend</strong>
+
+                  <p>
+                    Enquadramento quadrado usado no seletor de equipamentos.
+                  </p>
+
+                  <div
+                    id="preview-image"
+                    class="preview-large"
+                  >
+                    Selecione uma imagem
+                  </div>
+
+                  <div class="equipment-crop-controls">
+                    <label class="equipment-crop-control">
+                      <span>Zoom</span>
+                      <input id="equipment-crop-zoom" type="range" min="100" max="220" value="100">
+                      <output id="equipment-crop-zoom-value">100%</output>
+                    </label>
+
+                    <label class="equipment-crop-control">
+                      <span>Horizontal</span>
+                      <input id="equipment-crop-x" type="range" min="-30" max="30" value="0">
+                      <output id="equipment-crop-x-value">0</output>
+                    </label>
+
+                    <label class="equipment-crop-control">
+                      <span>Vertical</span>
+                      <input id="equipment-crop-y" type="range" min="-30" max="30" value="0">
+                      <output id="equipment-crop-y-value">0</output>
+                    </label>
+
+                    <div class="equipment-crop-actions">
+                      <button id="equipment-crop-reset" type="button" class="admin-button">
+                        Centralizar
+                      </button>
+
+                      <span id="equipment-crop-status" class="equipment-crop-status">
+                        O recorte será aplicado ao salvar.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="equipment-preview-block">
+                  <strong>Imagem completa</strong>
+
+                  <p>
+                    Arquivo original sem cortes ou ampliação.
+                  </p>
+
+                  <div
+                    id="preview-full-image"
+                    class="preview-full-image"
+                  >
+                    Selecione uma imagem
+                  </div>
+                </div>
+              </div>
+
+              <div class="equipment-media-tip">
+                A moldura tracejada mostra a área segura. Mantenha o objeto principal dentro dela para evitar cortes no frontend.
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- RARIDADES -->
+
+      <section
+        class="equipment-editor-panel"
+        data-panel="rarities"
+      >
+        <article class="equipment-form-card">
+          <div class="equipment-section-heading">
+            <div>
+              <h2>Raridades e atributos</h2>
+
+              <p>
+                Visual compacto para revisar todas as raridades sem sobrecarregar a tela.
+              </p>
+            </div>
+          </div>
+
+          <div
+            class="rarities-column-guide"
+            aria-hidden="true"
+          >
+            <span>Raridade</span>
+
+            <div class="rarities-column-guide-right">
+              <span>Atributo</span>
+              <span>Valor</span>
+              <span></span>
+            </div>
+          </div>
+
+          <div id="rarities"></div>
+        </article>
+      </section>
+
+      <!-- BÔNUS -->
+
+      <section
+        class="equipment-editor-panel"
+        data-panel="bonuses"
+      >
+        <article class="equipment-form-card">
+          <div class="equipment-section-heading">
+            <div>
+              <h2>Bônus do conjunto</h2>
+
+              <p>
+                Cadastre os bônus de 2, 4 e 6 peças.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              class="admin-button"
+              id="add-bonus"
+            >
+              Adicionar bônus
+            </button>
+          </div>
+
+          <div id="bonuses"></div>
+        </article>
+      </section>
+
+      <!-- PRÉVIA -->
+
+      <section
+        class="equipment-editor-panel"
+        data-panel="preview"
+      >
+        <article class="equipment-form-card">
+          <div class="equipment-section-heading">
+            <div>
+              <h2>Pré-visualização</h2>
+
+              <p>
+                Resumo rápido do cadastro atual.
+              </p>
+            </div>
+          </div>
+
+          <div class="equipment-preview-grid">
+            <div class="equipment-preview-item">
+              <span>Nome</span>
+
+              <strong id="equipment-preview-name">
+                Novo equipamento
+              </strong>
+            </div>
+
+            <div class="equipment-preview-item">
+              <span>Slug</span>
+
+              <strong id="equipment-preview-slug">
+                —
+              </strong>
+            </div>
+
+            <div class="equipment-preview-item">
+              <span>Publicação</span>
+
+              <strong id="equipment-preview-enabled">
+                Ativo
+              </strong>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <div
+        id="message"
+        class="eq-message"
+        role="status"
+        aria-live="polite"
+      ></div>
+    </form>
+  </div>
+
+  <script type="module">
+    import {
+      initAdminShell
+    } from './js/admin-shell.js';
+
+    const params =
+      new URLSearchParams(location.search);
+
+    let importedDraft = null;
+
+    try {
+      importedDraft = JSON.parse(
+        sessionStorage.getItem(
+          'equipment-import-draft'
+        ) || 'null'
+      );
+    } catch {
+      importedDraft = null;
+    }
+
+    const editing =
+      Boolean(params.get('id'));
+
+    const importDataLink =
+      document.getElementById(
+        'equipment-import-data-link'
+      );
+
+    function updateImportReturnLink() {
+      if (!importDataLink) {
+        return;
+      }
+
+      const currentEditorUrl =
+        `./equipment-editor.html${location.search}`;
+
+      importDataLink.href =
+        `./equipment-ai-import.html?returnTo=${encodeURIComponent(
+          currentEditorUrl
+        )}`;
+    }
+
+    updateImportReturnLink();
+
+    importDataLink?.addEventListener(
+      'click',
+      updateImportReturnLink
+    );
+
+    const shell =
+      await initAdminShell({
+        activeId:
+          editing
+            ? 'equipments-list'
+            : 'equipment-new',
+
+        pageTitle:
+          editing
+            ? 'Editar equipamento'
+            : 'Novo equipamento',
+
+        pageSubtitle:
+          'Gerenciamento de equipamentos'
+      });
+
+    if (shell) {
+      const buttons = [
+        ...document.querySelectorAll(
+          '[data-tab]'
+        )
+      ];
+
+      const panels = [
+        ...document.querySelectorAll(
+          '[data-panel]'
+        )
+      ];
+
+      function activateTab(tabName) {
+        const validTab =
+          buttons.some(
+            button =>
+              button.dataset.tab === tabName
+          )
+            ? tabName
+            : 'general';
+
+        buttons.forEach(button => {
+          button.classList.toggle(
+            'is-active',
+            button.dataset.tab === validTab
+          );
+        });
+
+        panels.forEach(panel => {
+          panel.classList.toggle(
+            'is-active',
+            panel.dataset.panel === validTab
+          );
+        });
+
+        const url =
+          new URL(location.href);
+
+        url.searchParams.set(
+          'tab',
+          validTab
+        );
+
+        history.replaceState(
+          {},
+          '',
+          url
+        );
+      }
+
+      buttons.forEach(button => {
+        button.addEventListener(
+          'click',
+          () => {
+            activateTab(
+              button.dataset.tab
+            );
+          }
+        );
+      });
+
+      activateTab(
+        params.get('tab') ||
+        'general'
+      );
+
+      const name =
+        document.getElementById('name');
+
+      const slug =
+        document.getElementById('slug');
+
+      const enabled =
+        document.getElementById('enabled');
+
+      function updatePreview() {
+        document
+          .getElementById(
+            'equipment-preview-name'
+          )
+          .textContent =
+            name?.value.trim() ||
+            'Novo equipamento';
+
+        document
+          .getElementById(
+            'equipment-preview-slug'
+          )
+          .textContent =
+            slug?.value.trim() ||
+            '—';
+
+        document
+          .getElementById(
+            'equipment-preview-enabled'
+          )
+          .textContent =
+            enabled?.checked
+              ? 'Ativo'
+              : 'Inativo';
+      }
+
+      name?.addEventListener(
+        'input',
+        updatePreview
+      );
+
+      slug?.addEventListener(
+        'input',
+        updatePreview
+      );
+
+      enabled?.addEventListener(
+        'change',
+        updatePreview
+      );
+
+      await import(
+        './js/equipment-editor.js'
+      );
+
+      const {
+        initEquipmentEditorEnhancements
+      } = await import(
+        './js/equipment-editor-enhancements.js?v=20260804-4'
+      );
+
+      await initEquipmentEditorEnhancements({
+        params,
+        importedDraft
+      });
+
+      updatePreview();
+    }
+  </script>
+</body>
+</html>

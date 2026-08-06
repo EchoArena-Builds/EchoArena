@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Editor de Herói — Echo Arena Admin</title>
+
+  <link rel="stylesheet" href="./css/admin.css">
+  <link rel="stylesheet" href="./css/admin-shell.css">
+
+  <style>
+    .hero-editor {
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero-editor-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .hero-editor-toolbar-copy strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    .hero-editor-toolbar-copy span {
+      display: block;
+      margin-top: 5px;
+      color: var(--admin-muted);
+      font-size: 12px;
+    }
+
+    .hero-editor-toolbar-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hero-editor-tabs {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding: 7px;
+      border: 1px solid var(--admin-line);
+      border-radius: 13px;
+      background: var(--admin-panel-2);
+    }
+
+    .hero-editor-tab {
+      flex: 0 0 auto;
+      min-height: 42px;
+      padding: 10px 15px;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--admin-muted);
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .hero-editor-tab:hover {
+      color: white;
+      background: #17213a;
+    }
+
+    .hero-editor-tab.is-active {
+      color: white;
+      background: linear-gradient(
+        180deg,
+        var(--admin-purple),
+        var(--admin-purple-dark)
+      );
+    }
+
+    .hero-editor-panel {
+      display: none;
+    }
+
+    .hero-editor-panel.is-active {
+      display: block;
+    }
+
+    .hero-form-card {
+      padding: 20px;
+      border: 1px solid var(--admin-line);
+      border-radius: 14px;
+      background: var(--admin-panel);
+    }
+
+    .hero-section-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .hero-section-heading h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .hero-section-heading p {
+      margin: 6px 0 0;
+      color: var(--admin-muted);
+      font-size: 12px;
+    }
+
+    .hero-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 15px;
+    }
+
+    .hero-form-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .hero-form-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .hero-form-field label,
+    .hero-media-field > label {
+      color: #c8cfdd;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .hero-field-help {
+      color: var(--admin-muted);
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
+    .hero-checkbox-field {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid var(--admin-line);
+      border-radius: 9px;
+      background: #08101e;
+    }
+
+    .hero-checkbox-field input {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+    }
+
+    /* =====================================================
+       MÍDIA
+    ===================================================== */
+
+    .hero-media-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .hero-media-field {
+      min-width: 0;
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--admin-line);
+      border-radius: 12px;
+      background: #09111f;
+    }
+
+    .hero-media-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hero-media-title strong {
+      font-size: 13px;
+    }
+
+    .hero-media-title span {
+      color: var(--admin-muted);
+      font-size: 10px;
+    }
+
+    .hero-media-file {
+      width: 100%;
+    }
+
+    .hero-crop-editor {
+      display: grid;
+      gap: 10px;
+    }
+
+    .hero-crop-canvas {
+      position: relative;
+      width: 100%;
+      height: 310px;
+      overflow: hidden;
+      border: 1px solid var(--admin-line);
+      border-radius: 11px;
+      background:
+        linear-gradient(
+          45deg,
+          rgba(255, 255, 255, 0.025) 25%,
+          transparent 25%
+        ),
+        linear-gradient(
+          -45deg,
+          rgba(255, 255, 255, 0.025) 25%,
+          transparent 25%
+        ),
+        linear-gradient(
+          45deg,
+          transparent 75%,
+          rgba(255, 255, 255, 0.025) 75%
+        ),
+        linear-gradient(
+          -45deg,
+          transparent 75%,
+          rgba(255, 255, 255, 0.025) 75%
+        ),
+        #050a12;
+
+      background-size: 22px 22px;
+      background-position:
+        0 0,
+        0 11px,
+        11px -11px,
+        -11px 0;
+
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .hero-crop-canvas.is-dragging {
+      cursor: grabbing;
+    }
+
+    .hero-crop-canvas img {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+
+      display: none;
+
+      max-width: none;
+      max-height: none;
+
+      pointer-events: none;
+      user-select: none;
+
+      transform-origin: center center;
+      will-change: transform;
+    }
+
+    .hero-crop-canvas.has-image img {
+      display: block;
+    }
+
+    .hero-crop-empty {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: calc(100% - 36px);
+
+      transform: translate(-50%, -50%);
+
+      color: var(--admin-muted);
+      font-size: 11px;
+      line-height: 1.5;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .hero-crop-canvas.has-image .hero-crop-empty {
+      display: none;
+    }
+
+    .hero-crop-hint {
+      min-height: 16px;
+      color: var(--admin-muted);
+      font-size: 10px;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .hero-crop-controls {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) 48px;
+      gap: 9px;
+      align-items: center;
+    }
+
+    .hero-crop-controls label {
+      color: #c8cfdd;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .hero-crop-controls input[type="range"] {
+      width: 100%;
+      accent-color: var(--admin-purple);
+    }
+
+    .hero-crop-controls output {
+      color: var(--admin-muted);
+      font-size: 10px;
+      text-align: right;
+    }
+
+    .hero-crop-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .hero-crop-buttons button {
+      min-width: 0;
+      min-height: 38px;
+      padding: 8px 10px;
+      font-size: 11px;
+    }
+
+    /* =====================================================
+       OUTRAS SEÇÕES
+    ===================================================== */
+
+    .hero-placeholder {
+      padding: 26px;
+      border: 1px dashed var(--admin-line);
+      border-radius: 12px;
+      background: #09111f;
+      text-align: center;
+    }
+
+    .hero-placeholder h3 {
+      margin: 0 0 7px;
+    }
+
+    .hero-placeholder p {
+      margin: 0 0 15px;
+      color: var(--admin-muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .hero-preview-layout {
+      display: grid;
+      grid-template-columns:
+        minmax(260px, 0.7fr)
+        minmax(0, 1.3fr);
+      gap: 18px;
+    }
+
+    .hero-preview-character {
+      min-height: 470px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--admin-line);
+      border-radius: 14px;
+      background:
+        radial-gradient(
+          circle at 50% 30%,
+          rgba(139, 92, 246, 0.22),
+          transparent 45%
+        ),
+        #07101f;
+      color: var(--admin-muted);
+    }
+
+    .hero-preview-character img {
+      max-width: none;
+      max-height: none;
+    }
+
+    .hero-preview-data {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+
+    .hero-preview-row {
+      padding: 13px;
+      border: 1px solid var(--admin-line);
+      border-radius: 10px;
+      background: #09111f;
+    }
+
+    .hero-preview-row span {
+      display: block;
+      color: var(--admin-muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .hero-preview-row strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 18px;
+      word-break: break-word;
+    }
+
+    #message {
+      min-height: 22px;
+      color: var(--admin-muted);
+      font-size: 13px;
+    }
+
+    #message.error {
+      color: #ff8585;
+    }
+
+    #message.ok {
+      color: #4ade80;
+    }
+
+    body.update-assistant-open { overflow: hidden; }
+    .update-assistant-backdrop {
+      position: fixed; inset: 0; z-index: 10000; display: none;
+      align-items: center; justify-content: center; padding: 24px;
+      background: rgba(2, 6, 15, .88); backdrop-filter: blur(10px);
+    }
+    .update-assistant-backdrop.is-open { display: flex; }
+    .update-assistant {
+      width: min(1180px, 100%); max-height: calc(100vh - 48px); overflow: hidden;
+      display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto;
+      border: 1px solid #2a3852; border-radius: 20px; background: #080f1d;
+      box-shadow: 0 30px 90px rgba(0,0,0,.6);
+    }
+    .update-assistant-head, .update-assistant-footer { padding: 20px 24px; }
+    .update-assistant-head { border-bottom: 1px solid #243149; }
+    .update-assistant-eyebrow { color: #ffcb66; font-size: 12px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
+    .update-assistant-head h2 { margin: 7px 0 4px; font-size: 28px; }
+    .update-assistant-head p { margin: 0; color: var(--admin-muted); }
+    .update-summary { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; padding: 16px 24px; border-bottom: 1px solid #243149; }
+    .update-summary-item { padding: 12px; border: 1px solid #26344d; border-radius: 12px; background: #0d1728; }
+    .update-summary-item strong { display: block; font-size: 20px; }
+    .update-summary-item span { color: var(--admin-muted); font-size: 10px; text-transform: uppercase; }
+    .update-assistant-body { overflow: auto; padding: 20px 24px; }
+    .update-identity-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+    .update-identity-card { display: grid; grid-template-columns: 72px 1fr; gap: 14px; align-items: center; padding: 15px; border: 1px solid #27354d; border-radius: 14px; background: #0b1424; }
+    .update-identity-card img, .update-avatar-placeholder { width: 72px; height: 82px; object-fit: contain; border-radius: 10px; background: #111c30; }
+    .update-avatar-placeholder { display:grid;place-items:center;color:#53617a;font-size:24px; }
+    .update-identity-card small { color: var(--admin-muted); font-size: 10px; font-weight: 800; letter-spacing: .08em; }
+    .update-identity-card h3 { margin: 5px 0; }
+    .update-identity-card p { margin: 0; color: #a9b4c7; font-size: 12px; }
+    .update-group { margin-top: 12px; border: 1px solid #26344c; border-radius: 14px; overflow: hidden; }
+    .update-group-head { display:flex;justify-content:space-between;align-items:center;padding:12px 15px;background:#101a2c;font-weight:900; }
+    .update-group-head span { color:var(--admin-muted);font-size:11px;font-weight:700; }
+    .update-diff { display:grid;grid-template-columns:28px minmax(150px,.7fr) 1fr 28px 1fr;gap:10px;align-items:center;padding:13px 15px;border-top:1px solid #202d43; }
+    .update-diff.is-same { opacity:.55; }
+    .update-diff input { width:17px;height:17px; }
+    .update-diff-label strong { display:block; }
+    .update-diff-label small { color:var(--admin-muted); }
+    .update-value { min-width:0;overflow-wrap:anywhere;padding:9px 10px;border-radius:8px;background:#0a1220;color:#b7c1d2;font-size:12px; }
+    .update-arrow { text-align:center;color:#77859d; }
+    .update-diff.increase .update-value:last-child { color:#77e69a;background:#10251a; }
+    .update-diff.decrease .update-value:last-child { color:#ff8d91;background:#2a1218; }
+    .update-diff.text .update-value:last-child { color:#ffd36e;background:#2a2110; }
+    .update-risk { grid-column:2/-1;padding:9px 11px;border:1px solid #7b5921;border-radius:8px;background:#2a200e;color:#ffd26d;font-size:11px; }
+    .update-empty { padding:34px;text-align:center;color:var(--admin-muted); }
+    .update-assistant-footer { display:flex;justify-content:space-between;gap:12px;align-items:center;border-top:1px solid #243149;background:#0a1220; }
+    .update-footer-actions { display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end; }
+    .update-final-stats { color:var(--admin-muted);font-size:11px;line-height:1.7; }
+    @media(max-width:760px){
+      .update-assistant-backdrop{padding:0}.update-assistant{max-height:100vh;height:100vh;border-radius:0}
+      .update-summary{grid-template-columns:repeat(2,1fr)}.update-identity-grid{grid-template-columns:1fr}
+      .update-diff{grid-template-columns:24px 1fr 20px 1fr}.update-diff-label{grid-column:2/-1}
+      .update-assistant-footer{align-items:stretch;flex-direction:column}.update-footer-actions{display:grid;grid-template-columns:1fr}
+    }
+
+    @media (max-width: 1180px) {
+      .hero-media-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .hero-media-field:last-child {
+        grid-column: 1 / -1;
+        max-width: calc(50% - 7px);
+      }
+    }
+
+    @media (max-width: 820px) {
+      .hero-media-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-media-field:last-child {
+        grid-column: auto;
+        max-width: none;
+      }
+
+      .hero-crop-canvas {
+        height: 360px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .hero-form-grid,
+      .hero-preview-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-form-field.full {
+        grid-column: auto;
+      }
+
+      .hero-preview-character {
+        min-height: 350px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .hero-crop-canvas {
+        height: 310px;
+      }
+
+      .hero-crop-controls {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-crop-controls output {
+        text-align: left;
+      }
+
+      .hero-crop-buttons {
+        grid-template-columns: 1fr;
+      }
+    }
+    [data-media-editor="main"] .hero-crop-canvas{aspect-ratio:280/305;height:auto}
+[data-media-editor="card"] .hero-crop-canvas{aspect-ratio:112/125;height:auto}
+[data-media-editor="gif"]  .hero-crop-canvas{aspect-ratio:1/1;height:auto}
+.hero-crop-canvas img{position:absolute;left:50%;top:50%;width:100%;height:100%;transform-origin:center center}
+  
+    /* =====================================================
+       STATUS E ARMA INTEGRADOS
+    ===================================================== */
+
+    .integrated-stats-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .integrated-stats-note {
+      color: var(--admin-muted);
+      font-size: 11px;
+      line-height: 1.55;
+    }
+
+    .integrated-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .integrated-stat-field {
+      display: grid;
+      align-content: start;
+      gap: 7px;
+      min-width: 0;
+      padding: 13px;
+      border: 1px solid var(--admin-line);
+      border-radius: 10px;
+      background: #09111f;
+    }
+
+    .integrated-stat-field label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      color: #d7ddeb;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .integrated-stat-field .unit {
+      color: var(--admin-purple);
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .integrated-stat-field small {
+      min-height: 28px;
+      color: var(--admin-muted);
+      font-size: 10px;
+      line-height: 1.4;
+    }
+
+    .integrated-stat-field input,
+    .integrated-weapon-name input {
+      width: 100%;
+      min-height: 42px;
+      padding: 10px 12px;
+      border: 1px solid var(--admin-line);
+      border-radius: 8px;
+      background: #050c18;
+      color: white;
+      outline: none;
+    }
+
+    .integrated-stat-field input:focus,
+    .integrated-weapon-name input:focus {
+      border-color: var(--admin-purple);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
+    }
+
+    .integrated-weapon-name {
+      display: grid;
+      gap: 7px;
+      width: min(100%, 360px);
+      color: #c8cfdd;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .integrated-stats-empty {
+      grid-column: 1 / -1;
+      padding: 24px;
+      border: 1px dashed var(--admin-line);
+      border-radius: 10px;
+      background: #09111f;
+      color: var(--admin-muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .integrated-stats-preview {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .integrated-preview-stat {
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid var(--admin-line);
+      border-radius: 9px;
+      background: #07101f;
+    }
+
+    .integrated-preview-stat span {
+      display: block;
+      color: var(--admin-muted);
+      font-size: 9px;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+    }
+
+    .integrated-preview-stat strong {
+      display: block;
+      margin-top: 5px;
+      font-size: 16px;
+      overflow-wrap: anywhere;
+    }
+
+    .integrated-import-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 1120px) {
+      .integrated-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .integrated-stats-preview {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .integrated-stats-grid,
+      .integrated-stats-preview {
+        grid-template-columns: 1fr;
+      }
+
+      .integrated-weapon-name {
+        width: 100%;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div data-admin-content>
+    <form id="hero-form" class="hero-editor">
+
+      <section class="hero-editor-toolbar">
+        <div class="hero-editor-toolbar-copy">
+          <strong id="editor-title">
+            Novo herói
+          </strong>
+
+          <span>
+            Cadastre as informações, mídias e configurações do herói.
+          </span>
+        </div>
+
+        <div class="hero-editor-toolbar-actions">
+          <a
+            class="admin-button"
+            href="./heroes.html"
+          >
+            Cancelar
+          </a>
+
+          <button
+            id="save-hero-button"
+            class="admin-button primary"
+            type="submit"
+          >
+            Salvar herói
+          </button>
+        </div>
+      </section>
+
+      <nav
+        class="hero-editor-tabs"
+        aria-label="Seções do editor"
+      >
+        <button
+          type="button"
+          class="hero-editor-tab is-active"
+          data-tab="general"
+        >
+          Informações
+        </button>
+
+        <button
+          type="button"
+          class="hero-editor-tab"
+          data-tab="media"
+        >
+          Mídia
+        </button>
+
+        <button
+          type="button"
+          class="hero-editor-tab"
+          data-tab="stats"
+        >
+          Status
+        </button>
+
+        <button
+          type="button"
+          class="hero-editor-tab"
+          data-tab="weapon"
+        >
+          Arma
+        </button>
+
+        <button
+          type="button"
+          class="hero-editor-tab"
+          data-tab="abilities"
+        >
+          Habilidades
+        </button>
+
+        <button
+          type="button"
+          class="hero-editor-tab"
+          data-tab="preview"
+        >
+          Prévia
+        </button>
+      </nav>
+
+      <!-- =================================================
+           INFORMAÇÕES
+      ================================================== -->
+
+      <section
+        class="hero-editor-panel is-active"
+        data-panel="general"
+      >
+        <article class="hero-form-card">
+          <div class="hero-section-heading">
+            <div>
+              <h2>Informações gerais</h2>
+
+              <p>
+                Dados principais utilizados no frontend.
+              </p>
+            </div>
+          </div>
+
+          <div class="hero-form-grid">
+            <div class="hero-form-field">
+              <label for="name">
+                Nome do herói
+              </label>
+
+              <input
+                id="name"
+                class="admin-input"
+                type="text"
+                maxlength="80"
+                required
+                placeholder="Ex.: Slayer"
+              >
+            </div>
+
+            <div class="hero-form-field">
+              <label for="slug">
+                Identificador automático
+              </label>
+
+              <input
+                id="slug"
+                class="admin-input"
+                type="text"
+                readonly
+                placeholder="Gerado pelo nome"
+              >
+
+              <span class="hero-field-help">
+                O sistema gera automaticamente.
+              </span>
+            </div>
+
+            <div class="hero-form-field">
+              <label for="class-id">
+                Classe do herói
+              </label>
+
+              <select
+                id="class-id"
+                class="admin-select"
+              >
+                <option value="">
+                  Sem classe
+                </option>
+              </select>
+            </div>
+
+            <div class="hero-form-field">
+              <label for="rarity-id">
+                Raridade do herói
+              </label>
+
+              <select
+                id="rarity-id"
+                class="admin-select"
+              >
+                <option value="">
+                  Sem raridade
+                </option>
+              </select>
+
+              <span class="hero-field-help">
+                Carregada da tabela hero_rarities.
+              </span>
+            </div>
+
+            <div class="hero-form-field">
+              <label for="faction">
+                Facção
+              </label>
+
+              <input
+                id="faction"
+                class="admin-input"
+                type="text"
+                maxlength="100"
+                placeholder="Ex.: Força e Armas"
+              >
+
+              <span class="hero-field-help">
+                O valor importado do JSON será preenchido automaticamente.
+              </span>
+            </div>
+
+            <div class="hero-form-field">
+              <label for="display-order">
+                Ordem de exibição
+              </label>
+
+              <input
+                id="display-order"
+                class="admin-input"
+                type="number"
+                value="0"
+                step="1"
+              >
+            </div>
+
+            <div class="hero-form-field full">
+              <label for="description">
+                Descrição
+              </label>
+
+              <textarea
+                id="description"
+                class="admin-textarea"
+                rows="6"
+                placeholder="Descreva o herói."
+              ></textarea>
+            </div>
+
+            <div class="hero-form-field">
+              <label>
+                Publicação
+              </label>
+
+              <label class="hero-checkbox-field">
+                <input
+                  id="enabled"
+                  type="checkbox"
+                  checked
+                >
+
+                <span>
+                  Herói ativo e visível no frontend
+                </span>
+              </label>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- =================================================
+           MÍDIA
+      ================================================== -->
+
+      <section
+        class="hero-editor-panel"
+        data-panel="media"
+      >
+        <article class="hero-form-card">
+          <div class="hero-section-heading">
+            <div>
+              <h2>Mídia do herói</h2>
+
+              <p>
+                Todas as mídias podem ser arrastadas e ampliadas individualmente.
+              </p>
+            </div>
+          </div>
+
+          <div class="hero-media-grid">
+
+            <!-- IMAGEM PRINCIPAL -->
+
+            <section
+              class="hero-media-field"
+              data-media-editor="main"
+            >
+              <div class="hero-media-title">
+                <strong>Imagem principal</strong>
+                <span>Frontend</span>
+              </div>
+
+              <input
+                id="image-file"
+                class="admin-input hero-media-file"
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+              >
+
+              <div class="hero-crop-editor">
+                <div
+                  id="main-image-canvas"
+                  class="hero-crop-canvas"
+                >
+                  <img
+                    id="main-image-element"
+                    alt=""
+                    draggable="false"
+                  >
+
+                  <span
+                    id="main-image-empty"
+                    class="hero-crop-empty"
+                  >
+                    Selecione a imagem principal
+                  </span>
+                </div>
+
+                <div class="hero-crop-hint">
+                  Arraste com o mouse ou com o dedo.
+                </div>
+
+                <div class="hero-crop-controls">
+                  <label for="main-image-zoom">
+                    Zoom
+                  </label>
+
+                  <input
+                    id="main-image-zoom"
+                    type="range"
+                    min="0.5"
+                    max="3"
+                    step="0.01"
+                    value="1"
+                  >
+
+                  <output id="main-image-zoom-value">
+                    100%
+                  </output>
+                </div>
+
+                <div class="hero-crop-buttons">
+                  <button
+                    id="main-image-center"
+                    class="admin-button"
+                    type="button"
+                  >
+                    Centralizar
+                  </button>
+
+                  <button
+                    id="main-image-reset"
+                    class="admin-button"
+                    type="button"
+                  >
+                    Restaurar
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <!-- IMAGEM DO CARD -->
+
+            <section
+              class="hero-media-field"
+              data-media-editor="card"
+            >
+              <div class="hero-media-title">
+                <strong>Imagem do card</strong>
+                <span>Lista e seleção</span>
+              </div>
+
+              <input
+                id="card-file"
+                class="admin-input hero-media-file"
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+              >
+
+              <div class="hero-crop-editor">
+                <div
+                  id="card-image-canvas"
+                  class="hero-crop-canvas"
+                >
+                  <img
+                    id="card-image-element"
+                    alt=""
+                    draggable="false"
+                  >
+
+                  <span
+                    id="card-image-empty"
+                    class="hero-crop-empty"
+                  >
+                    Selecione a imagem do card
+                  </span>
+                </div>
+
+                <div class="hero-crop-hint">
+                  Arraste com o mouse ou com o dedo.
+                </div>
+
+                <div class="hero-crop-controls">
+                  <label for="card-image-zoom">
+                    Zoom
+                  </label>
+
+                  <input
+                    id="card-image-zoom"
+                    type="range"
+                    min="0.5"
+                    max="3"
+                    step="0.01"
+                    value="1"
+                  >
+
+                  <output id="card-image-zoom-value">
+                    100%
+                  </output>
+                </div>
+
+                <div class="hero-crop-buttons">
+                  <button
+                    id="card-image-center"
+                    class="admin-button"
+                    type="button"
+                  >
+                    Centralizar
+                  </button>
+
+                  <button
+                    id="card-image-reset"
+                    class="admin-button"
+                    type="button"
+                  >
+                    Restaurar
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <!-- GIF -->
+
+            <section
+              class="hero-media-field"
+              data-media-editor="gif"
+            >
+              <div class="hero-media-title">
+                <strong>GIF animado</strong>
+                <span>Animação</span>
+              </div>
+
+              <input
+                id="gif-file"
+                class="admin-input hero-media-file"
+                type="file"
+                accept="image/gif"
+              >
+
+              <div class="hero-crop-editor">
+                <div
+                  id="gif-image-canvas"
+                  class="hero-crop-canvas"
+                >
+                  <img
+                    id="gif-image-element"
+                    alt=""
+                    draggable="false"
+                  >
+
+                  <span
+                    id="gif-image-empty"
+                    class="hero-crop-empty"
+                  >
+                    Selecione o GIF animado
+                  </span>
+                </div>
+
+                <div class="hero-crop-hint">
+                  Arraste com o mouse ou com o dedo.
+                </div>
+
+                <div class="hero-crop-controls">
+                  <label for="gif-image-zoom">
+                    Zoom
+                  </label>
+
+                  <input
+                    id="gif-image-zoom"
+                    type="range"
+                    min="0.5"
+                    max="3"
+                    step="0.01"
+                    value="1"
+                  >
+
+                  <output id="gif-image-zoom-value">
+                    100%
+                  </output>
+                </div>
+
+                <div class="hero-crop-buttons">
+                  <button
+                    id="gif-image-center"
+                    class="admin-button"
+                    type="button"
+                  >
+                    Centralizar
+                  </button>
+
+                  <button
+                    id="gif-image-reset"
+                    class="admin-button"
+                    type="button"
+                  >
+                    Restaurar
+                  </button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </article>
+      </section>
+
+      <!-- =================================================
+           STATUS
+      ================================================== -->
+
+      <section
+        class="hero-editor-panel"
+        data-panel="stats"
+      >
+        <article class="hero-form-card">
+          <div class="hero-section-heading">
+            <div>
+              <h2>Status base</h2>
+
+              <p>
+                Vida, armadura, visão, mobilidade e demais estatísticas.
+              </p>
+            </div>
+
+            <div class="integrated-import-actions">
+              <button
+                id="apply-imported-stats"
+                type="button"
+                class="admin-button"
+                hidden
+              >
+                Aplicar dados importados
+              </button>
+
+              <button
+                id="undo-imported-stats"
+                type="button"
+                class="admin-button"
+                disabled
+              >
+                Desfazer preenchimento
+              </button>
+            </div>
+          </div>
+
+          <div
+            id="hero-stats-grid"
+            class="integrated-stats-grid"
+          >
+            <div class="integrated-stats-empty">
+              Carregando definições de status...
+            </div>
+          </div>
+
+          <div
+            id="hero-stats-preview"
+            class="integrated-stats-preview"
+          ></div>
+        </article>
+      </section>
+
+      <!-- =================================================
+           ARMA
+      ================================================== -->
+
+      <section
+        class="hero-editor-panel"
+        data-panel="weapon"
+      >
+        <article class="hero-form-card">
+          <div class="hero-section-heading">
+            <div>
+              <h2>Arma</h2>
+
+              <p>
+                Dano, cadência, recarga, alcance, precisão e dispersão.
+              </p>
+            </div>
+
+            <label class="integrated-weapon-name">
+              Nome da arma
+
+              <input
+                id="weapon-name"
+                type="text"
+                maxlength="100"
+                placeholder="Ex.: Rifle de Precisão"
+              >
+            </label>
+          </div>
+
+          <div
+            id="weapon-stats-grid"
+            class="integrated-stats-grid"
+          >
+            <div class="integrated-stats-empty">
+              Carregando definições da arma...
+            </div>
+          </div>
+
+          <div
+            id="weapon-stats-preview"
+            class="integrated-stats-preview"
+          ></div>
+        </article>
+      </section>
+
+      <!-- =================================================
+           HABILIDADES
+      ================================================== -->
+
+      <section
+        class="hero-editor-panel"
+        data-panel="abilities"
+      >
+        <article class="hero-form-card">
+          <div class="hero-section-heading">
+            <div>
+              <h2>Habilidades</h2>
+
+              <p>
+                Habilidades especiais do herói.
+              </p>
+            </div>
+          </div>
+
+          <div class="hero-placeholder">
+            <h3>Módulo de habilidades</h3>
+
+            <p>
+              Essa seção será conectada ao banco na próxima etapa.
+            </p>
+          </div>
+        </article>
+      </section>
+
+      <!-- =================================================
+           PRÉVIA
+      ================================================== -->
+
+      <section
+        class="hero-editor-panel"
+        data-panel="preview"
+      >
+        <article class="hero-form-card">
+          <div class="hero-section-heading">
+            <div>
+              <h2>Pré-visualização</h2>
+
+              <p>
+                Confira os dados antes de salvar.
+              </p>
+            </div>
+          </div>
+
+          <div class="hero-preview-layout">
+            <div
+              id="hero-live-preview"
+              class="hero-preview-character"
+            >
+              Sem mídia selecionada
+            </div>
+
+            <div class="hero-preview-data">
+              <div class="hero-preview-row">
+                <span>Nome</span>
+
+                <strong id="preview-name">
+                  Novo herói
+                </strong>
+              </div>
+
+              <div class="hero-preview-row">
+                <span>Identificador</span>
+
+                <strong id="preview-slug">
+                  —
+                </strong>
+              </div>
+
+              <div class="hero-preview-row">
+                <span>Descrição</span>
+
+                <strong id="preview-description">
+                  Nenhuma descrição cadastrada.
+                </strong>
+              </div>
+
+              <div class="hero-preview-row">
+                <span>Publicação</span>
+
+                <strong id="preview-enabled">
+                  Ativo
+                </strong>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <div id="message"></div>
+    </form>
+  </div>
+
+  <div id="update-assistant-backdrop" class="update-assistant-backdrop" aria-hidden="true">
+    <section class="update-assistant" role="dialog" aria-modal="true" aria-labelledby="update-assistant-title">
+      <header class="update-assistant-head">
+        <div class="update-assistant-eyebrow">⚠ Herói já cadastrado</div>
+        <h2 id="update-assistant-title">Revisar atualização</h2>
+        <p>Encontramos um herói existente. Revise as alterações antes de atualizar.</p>
+      </header>
+      <div id="update-assistant-summary" class="update-summary"></div>
+      <div id="update-assistant-body" class="update-assistant-body"></div>
+      <footer class="update-assistant-footer">
+        <div id="update-final-stats" class="update-final-stats"></div>
+        <div class="update-footer-actions">
+          <button id="update-cancel" class="admin-button" type="button">Cancelar · voltar ao editor</button>
+          <button id="update-discard" class="admin-button" type="button">Descartar importação</button>
+          <button id="update-all" class="admin-button" type="button">Atualizar TODOS</button>
+          <button id="update-selected" class="admin-button primary" type="button">Atualizar campos selecionados</button>
+        </div>
+      </footer>
+    </section>
+  </div>
+
+  <script type="module">
+    import { initAdminShell } from './js/admin-shell.js';
+
+    const params =
+      new URLSearchParams(location.search);
+
+    const editing =
+      Boolean(params.get('id'));
+
+    const shell =
+      await initAdminShell({
+        activeId:
+          editing
+            ? 'heroes-list'
+            : 'hero-new',
+
+        pageTitle:
+          editing
+            ? 'Editar herói'
+            : 'Novo herói',
+
+        pageSubtitle:
+          'Gerenciamento de heróis'
+      });
+
+    if (shell) {
+      const buttons = [
+        ...document.querySelectorAll(
+          '[data-tab]'
+        )
+      ];
+
+      const panels = [
+        ...document.querySelectorAll(
+          '[data-panel]'
+        )
+      ];
+
+      function activateTab(tabName) {
+        const validTab =
+          buttons.some(
+            button =>
+              button.dataset.tab === tabName
+          )
+            ? tabName
+            : 'general';
+
+        buttons.forEach(button => {
+          button.classList.toggle(
+            'is-active',
+            button.dataset.tab === validTab
+          );
+        });
+
+        panels.forEach(panel => {
+          panel.classList.toggle(
+            'is-active',
+            panel.dataset.panel === validTab
+          );
+        });
+
+        const url =
+          new URL(location.href);
+
+        url.searchParams.set(
+          'tab',
+          validTab
+        );
+
+        history.replaceState(
+          {},
+          '',
+          url
+        );
+      }
+
+      buttons.forEach(button => {
+        button.addEventListener(
+          'click',
+          () => {
+            activateTab(
+              button.dataset.tab
+            );
+          }
+        );
+      });
+
+      activateTab(
+        params.get('tab') ||
+        'general'
+      );
+
+      await import(
+        './js/hero-editor.js?v=20260803-rarity-faction-1'
+      );
+    }
+  </script>
+</body>
+</html>

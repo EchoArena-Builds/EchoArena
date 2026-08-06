@@ -1,0 +1,357 @@
+/* =========================================================
+   ECHO ARENA — CASCA DO PAINEL ADMINISTRATIVO
+   Layout, barra lateral, topo e área de conteúdo.
+   As variáveis e componentes base ficam em admin.css.
+   ========================================================= */
+
+body.admin-shell-body{
+  margin:0;
+  background:var(--admin-bg,#070b14);
+  color:var(--admin-text,#f5f7ff);
+}
+
+body.admin-shell-lock{overflow:hidden}
+
+/* ---------------------------------------------------------
+   ESTRUTURA
+--------------------------------------------------------- */
+
+.admin-shell-app{
+  display:grid;
+  grid-template-columns:250px minmax(0,1fr);
+  min-height:100vh;
+}
+
+.admin-shell-workspace{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+
+/* ---------------------------------------------------------
+   BARRA LATERAL
+--------------------------------------------------------- */
+
+.admin-shell-sidebar{
+  position:sticky;
+  top:0;
+  align-self:start;
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+  height:100vh;
+  padding:22px 16px;
+  overflow-y:auto;
+  border-right:1px solid var(--admin-line,#26344f);
+  background:var(--admin-panel,#0f1728);
+}
+
+.admin-shell-brand{
+  display:flex;
+  align-items:baseline;
+  gap:7px;
+  padding:0 8px 4px;
+  font-size:21px;
+  font-weight:800;
+  letter-spacing:.02em;
+  color:var(--admin-text,#f5f7ff);
+  text-decoration:none;
+}
+
+.admin-shell-brand:hover{color:var(--admin-text,#f5f7ff)}
+.admin-shell-brand strong{color:var(--admin-purple-light,#b99eff)}
+
+.admin-shell-nav{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+/* itens simples */
+.admin-shell-item{
+  display:block;
+  padding:11px 14px;
+  border:1px solid transparent;
+  border-radius:10px;
+  color:var(--admin-muted,#9da8bd);
+  font-size:13px;
+  font-weight:600;
+  text-decoration:none;
+  transition:background .15s ease,color .15s ease;
+}
+
+.admin-shell-item:hover{
+  background:var(--admin-panel-2,#111c31);
+  color:var(--admin-text,#f5f7ff);
+}
+
+.admin-shell-item.is-active{
+  background:linear-gradient(180deg,var(--admin-purple,#8b5cf6),var(--admin-purple-dark,#6d28d9));
+  border-color:transparent;
+  color:#fff;
+  box-shadow:0 8px 22px -12px rgba(139,92,246,.9);
+}
+
+/* grupos com submenu */
+.admin-shell-group{display:flex;flex-direction:column}
+
+.admin-shell-group-trigger{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  width:100%;
+  padding:11px 14px;
+  border:0;
+  border-radius:10px;
+  background:transparent;
+  color:var(--admin-muted,#9da8bd);
+  font-family:inherit;
+  font-size:13px;
+  font-weight:600;
+  text-align:left;
+  cursor:pointer;
+  transition:background .15s ease,color .15s ease;
+}
+
+.admin-shell-group-trigger:hover{
+  background:var(--admin-panel-2,#111c31);
+  color:var(--admin-text,#f5f7ff);
+}
+
+.admin-shell-group-trigger.is-active{color:var(--admin-text,#f5f7ff)}
+
+.admin-shell-chevron{
+  font-size:13px;
+  line-height:1;
+  transition:transform .2s ease;
+}
+
+.admin-shell-group.is-open .admin-shell-chevron{transform:rotate(180deg)}
+
+.admin-shell-submenu{
+  display:none;
+  flex-direction:column;
+  margin:2px 0 4px 12px;
+  padding-left:10px;
+  border-left:1px solid var(--admin-line,#26344f);
+}
+
+.admin-shell-group.is-open .admin-shell-submenu{display:flex}
+
+.admin-shell-subitem{
+  display:block;
+  padding:9px 12px;
+  margin-top:2px;
+  border-radius:8px;
+  color:var(--admin-faint,#65718a);
+  font-size:12.5px;
+  font-weight:500;
+  text-decoration:none;
+  transition:background .15s ease,color .15s ease;
+}
+
+.admin-shell-subitem:hover{
+  background:var(--admin-panel-2,#111c31);
+  color:var(--admin-text,#f5f7ff);
+}
+
+.admin-shell-subitem.is-active{
+  background:var(--admin-panel-2,#111c31);
+  color:var(--admin-purple-light,#b99eff);
+  font-weight:700;
+}
+
+/* rodapé da lateral */
+.admin-shell-sidebar-footer{
+  padding-top:16px;
+  border-top:1px solid var(--admin-line,#26344f);
+}
+
+.admin-shell-site-link{
+  display:block;
+  padding:11px;
+  border:1px solid var(--admin-line-2,#33415f);
+  border-radius:10px;
+  background:var(--admin-panel-2,#111c31);
+  color:var(--admin-muted,#9da8bd);
+  font-size:12px;
+  font-weight:700;
+  text-align:center;
+  text-decoration:none;
+  transition:background .15s ease,color .15s ease;
+}
+
+.admin-shell-site-link:hover{
+  background:#17213a;
+  color:var(--admin-text,#f5f7ff);
+}
+
+/* ---------------------------------------------------------
+   TOPO
+--------------------------------------------------------- */
+
+.admin-shell-topbar{
+  position:sticky;
+  top:0;
+  z-index:20;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  padding:16px 28px;
+  border-bottom:1px solid var(--admin-line,#26344f);
+  background:rgba(7,11,20,.92);
+  backdrop-filter:blur(8px);
+}
+
+.admin-shell-mobile-toggle{
+  display:none;
+  width:40px;
+  height:40px;
+  flex:0 0 40px;
+  border:1px solid var(--admin-line-2,#33415f);
+  border-radius:10px;
+  background:var(--admin-panel-2,#111c31);
+  color:var(--admin-text,#f5f7ff);
+  font-size:17px;
+  cursor:pointer;
+}
+
+.admin-shell-heading{flex:1;min-width:0}
+
+.admin-shell-heading span{
+  display:block;
+  color:var(--admin-purple-light,#b99eff);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+
+.admin-shell-heading h1{
+  margin:4px 0 0;
+  font-size:30px;
+  font-weight:700;
+  line-height:1.1;
+  word-break:break-word;
+}
+
+.admin-shell-user{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex:0 0 auto;
+}
+
+.admin-shell-user-copy{
+  min-width:0;
+  text-align:right;
+}
+
+.admin-shell-user-copy strong{
+  display:block;
+  font-size:13px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:190px;
+}
+
+.admin-shell-user-copy span{
+  display:block;
+  margin-top:2px;
+  color:var(--admin-faint,#65718a);
+  font-size:11px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:190px;
+}
+
+.admin-shell-logout{
+  min-height:40px;
+  padding:10px 16px;
+  border:1px solid var(--admin-line-2,#33415f);
+  border-radius:10px;
+  background:var(--admin-panel-2,#111c31);
+  color:var(--admin-text,#f5f7ff);
+  font-family:inherit;
+  font-size:12.5px;
+  font-weight:700;
+  cursor:pointer;
+  transition:background .15s ease;
+}
+
+.admin-shell-logout:hover{background:#17213a}
+
+/* ---------------------------------------------------------
+   CONTEÚDO
+--------------------------------------------------------- */
+
+.admin-shell-main{
+  flex:1;
+  min-width:0;
+  padding:28px;
+}
+
+.admin-shell-content{min-width:0}
+
+/* ---------------------------------------------------------
+   FUNDO MÓVEL
+--------------------------------------------------------- */
+
+.admin-shell-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:40;
+  display:none;
+  background:rgba(3,7,15,.72);
+  backdrop-filter:blur(3px);
+}
+
+.admin-shell-backdrop.is-visible{display:block}
+
+/* ---------------------------------------------------------
+   RESPONSIVO
+--------------------------------------------------------- */
+
+@media(max-width:1200px){
+  .admin-shell-app{grid-template-columns:220px minmax(0,1fr)}
+  .admin-shell-main{padding:22px}
+  .admin-shell-topbar{padding:15px 22px}
+  .admin-shell-heading h1{font-size:26px}
+}
+
+@media(max-width:900px){
+  .admin-shell-app{grid-template-columns:minmax(0,1fr)}
+
+  .admin-shell-sidebar{
+    position:fixed;
+    top:0;
+    bottom:0;
+    left:0;
+    z-index:50;
+    width:min(280px,84vw);
+    height:100vh;
+    transform:translateX(-100%);
+    transition:transform .22s ease;
+    box-shadow:0 0 60px rgba(0,0,0,.5);
+  }
+
+  .admin-shell-sidebar.is-mobile-open{transform:translateX(0)}
+
+  .admin-shell-mobile-toggle{display:grid;place-items:center}
+
+  .admin-shell-user-copy{display:none}
+
+  .admin-shell-topbar{padding:13px 16px}
+  .admin-shell-main{padding:16px}
+  .admin-shell-heading h1{font-size:22px}
+}
+
+@media(max-width:520px){
+  .admin-shell-heading span{font-size:9px}
+  .admin-shell-heading h1{font-size:19px}
+  .admin-shell-logout{padding:9px 12px;font-size:11.5px}
+}

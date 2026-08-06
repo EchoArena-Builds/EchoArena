@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Importar equipamento — Echo Admin</title>
+<link rel="stylesheet" href="./css/admin.css">
+<link rel="stylesheet" href="./css/equipments.css">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body>
+<div class="equipment-page">
+  <aside class="sidebar">
+    <div class="brand">ECHO <span>ADMIN</span></div>
+    <nav><a href="./index.html">Dashboard</a><a href="./heroes.html">Heróis</a><a class="active" href="./equipments.html">Equipamentos</a></nav>
+    <button id="logout" class="btn ghost">Sair</button>
+  </aside>
+  <main class="equipment-main">
+    <header class="eq-head">
+      <div><div class="eyebrow">OCR com revisão</div><h1>Importar por print</h1></div>
+      <a class="eq-btn" href="./equipments.html">Voltar</a>
+    </header>
+
+    <section class="import-layout">
+      <div class="eq-panel">
+        <label>Print do jogo<input id="screenshot" type="file" accept="image/*"></label>
+        <div id="dropzone" class="dropzone">Selecione o print para iniciar.</div>
+        <button id="extract" class="eq-btn primary" type="button" style="margin-top:12px">Extrair dados do print</button>
+        <div id="ocr-status" class="ocr-status"></div>
+      </div>
+
+      <div class="eq-panel">
+        <h2>Dados reconhecidos</h2>
+        <label>Texto extraído<textarea id="raw-text" rows="18"></textarea></label>
+        <button id="review" class="eq-btn" type="button">Montar revisão</button>
+      </div>
+    </section>
+
+    <section class="eq-panel">
+      <h2>Revisão antes do Supabase</h2>
+      <p class="eq-muted">Nada é salvo automaticamente. Revise os campos e então envie para o editor.</p>
+      <div id="review-area"></div>
+      <button id="send-editor" class="eq-btn primary" type="button" disabled>Enviar dados revisados ao editor</button>
+    </section>
+  </main>
+</div>
+<script type="module" src="./js/equipment-import.js"></script>
+</body></html>

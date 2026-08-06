@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Equipamentos — Echo Arena Admin</title>
+
+  <link
+    rel="stylesheet"
+    href="./css/admin.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="./css/admin-shell.css"
+  >
+
+  <style>
+    .equipments-page {
+      display: grid;
+      gap: 16px;
+    }
+
+    .equipments-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .equipments-toolbar-copy strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    .equipments-toolbar-copy span {
+      display: block;
+      margin-top: 5px;
+      color: var(--admin-muted);
+      font-size: 12px;
+    }
+
+    .equipments-toolbar-actions {
+      display: flex;
+      gap: 9px;
+      flex-wrap: wrap;
+    }
+
+    .equipment-filters {
+      display: grid;
+      grid-template-columns:
+        minmax(220px, 1fr)
+        minmax(170px, 220px)
+        minmax(170px, 220px);
+      gap: 10px;
+      padding: 14px;
+      border: 1px solid var(--admin-line);
+      border-radius: 13px;
+      background: var(--admin-panel);
+    }
+
+    .equipment-filter-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .equipment-filter-field label {
+      color: #c8cfdd;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    /* =====================================================
+       GRADE COMPACTA
+    ===================================================== */
+
+    .equipment-list {
+      display: grid;
+      grid-template-columns:
+        repeat(auto-fill, minmax(250px, 1fr));
+      gap: 11px;
+      align-items: stretch;
+    }
+
+    .equipment-card {
+      min-width: 0;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: 128px minmax(0, 1fr);
+      border: 1px solid var(--admin-line);
+      border-radius: 12px;
+      background: var(--admin-panel);
+      transition:
+        transform 0.16s ease,
+        border-color 0.16s ease,
+        box-shadow 0.16s ease;
+    }
+
+    .equipment-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(139, 92, 246, 0.5);
+      box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.2);
+    }
+
+    .equipment-card-media {
+      position: relative;
+      height: 128px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-bottom: 1px solid var(--admin-line);
+      background:
+        radial-gradient(
+          circle at 50% 48%,
+          rgba(139, 92, 246, 0.16),
+          transparent 56%
+        ),
+        #07101f;
+    }
+
+    .equipment-card-media img {
+      width: 100%;
+      height: 100%;
+      padding: 7px;
+      object-fit: contain;
+    }
+
+    .equipment-card-media-empty {
+      color: var(--admin-muted);
+      font-size: 10px;
+    }
+
+    .equipment-card-body {
+      min-width: 0;
+      display: grid;
+      grid-template-rows:
+        auto
+        auto
+        auto;
+      align-content: start;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .equipment-card-heading {
+      min-width: 0;
+    }
+
+    .equipment-card-heading h2 {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .equipment-card-heading p {
+      margin: 4px 0 0;
+      overflow: hidden;
+      color: var(--admin-muted);
+      font-size: 9px;
+      line-height: 1.3;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .equipment-card-meta {
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .equipment-meta-item {
+      min-width: 0;
+      padding: 7px 8px;
+      border: 1px solid var(--admin-line);
+      border-radius: 8px;
+      background: #09111f;
+    }
+
+    .equipment-meta-item span {
+      display: block;
+      color: var(--admin-muted);
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .equipment-meta-item strong {
+      display: block;
+      margin-top: 3px;
+      font-size: 10px;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .equipment-card-actions {
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .equipment-card-actions .admin-button {
+      justify-content: center;
+      min-width: 0;
+      min-height: 34px;
+      padding: 7px 9px;
+      border-radius: 8px;
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .equipment-card-actions .danger {
+      color: #ff9aaa;
+      border-color: #71303b;
+      background: #2a1016;
+    }
+
+    .equipment-card-actions .danger:hover {
+      border-color: #9a3f4e;
+      background: #38141c;
+    }
+
+    .equipment-message {
+      min-height: 20px;
+      color: var(--admin-muted);
+      font-size: 12px;
+    }
+
+    .equipment-message.error {
+      color: #ff8585;
+    }
+
+    .equipment-message.ok {
+      color: #4ade80;
+    }
+
+    .equipment-empty {
+      grid-column: 1 / -1;
+      padding: 32px;
+      border: 1px dashed var(--admin-line);
+      border-radius: 13px;
+      background: var(--admin-panel);
+      color: var(--admin-muted);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    /* =====================================================
+       RESPONSIVIDADE
+    ===================================================== */
+
+    @media (min-width: 1550px) {
+      .equipment-list {
+        grid-template-columns:
+          repeat(auto-fill, minmax(235px, 1fr));
+      }
+    }
+
+    @media (max-width: 1050px) {
+      .equipment-list {
+        grid-template-columns:
+          repeat(auto-fill, minmax(230px, 1fr));
+      }
+    }
+
+    @media (max-width: 780px) {
+      .equipment-filters {
+        grid-template-columns: 1fr;
+      }
+
+      .equipments-toolbar-actions {
+        width: 100%;
+      }
+
+      .equipments-toolbar-actions .admin-button {
+        flex: 1 1 100%;
+        justify-content: center;
+      }
+
+      .equipment-list {
+        grid-template-columns:
+          repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      .equipment-list {
+        grid-template-columns: 1fr;
+      }
+
+      .equipment-card {
+        grid-template-columns: 96px minmax(0, 1fr);
+        grid-template-rows: auto;
+      }
+
+      .equipment-card-media {
+        width: 96px;
+        height: 100%;
+        min-height: 150px;
+        border-right: 1px solid var(--admin-line);
+        border-bottom: 0;
+      }
+
+      .equipment-card-body {
+        padding: 10px;
+      }
+
+      .equipment-card-meta {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div data-admin-content>
+    <section class="equipments-page">
+
+      <header class="equipments-toolbar">
+        <div class="equipments-toolbar-copy">
+          <strong>
+            Gerenciamento de equipamentos
+          </strong>
+
+          <span>
+            Consulte, importe, edite ou remova equipamentos.
+          </span>
+        </div>
+
+        <div class="equipments-toolbar-actions">
+          <a
+            class="admin-button"
+            href="./equipment-ai-import.html"
+          >
+            Importar por JSON
+          </a>
+
+          <a
+            class="admin-button"
+            href="./equipment-import.html"
+          >
+            Importar por print
+          </a>
+
+          <a
+            class="admin-button primary"
+            href="./equipment-editor.html"
+          >
+            Novo equipamento
+          </a>
+        </div>
+      </header>
+
+      <section class="equipment-filters">
+        <div class="equipment-filter-field">
+          <label for="search">
+            Buscar
+          </label>
+
+          <input
+            id="search"
+            class="admin-input"
+            type="search"
+            placeholder="Nome, conjunto ou slot..."
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="equipment-filter-field">
+          <label for="set-filter">
+            Conjunto
+          </label>
+
+          <select
+            id="set-filter"
+            class="admin-select"
+          >
+            <option value="all">
+              Todos os conjuntos
+            </option>
+          </select>
+        </div>
+
+        <div class="equipment-filter-field">
+          <label for="slot-filter">
+            Slot
+          </label>
+
+          <select
+            id="slot-filter"
+            class="admin-select"
+          >
+            <option value="all">
+              Todos os slots
+            </option>
+          </select>
+        </div>
+      </section>
+
+      <div
+        id="message"
+        class="equipment-message"
+        role="status"
+        aria-live="polite"
+      ></div>
+
+      <section
+        id="equipment-list"
+        class="equipment-list"
+      >
+        <div class="equipment-empty">
+          Carregando equipamentos...
+        </div>
+      </section>
+    </section>
+  </div>
+
+  <script type="module">
+    function showFatalError(title, error) {
+      document.body.innerHTML = `
+        <main style="
+          max-width: 900px;
+          margin: 40px auto;
+          padding: 24px;
+          font-family: Arial, sans-serif;
+          color: white;
+          background: #111a2e;
+          border: 1px solid #33415f;
+          border-radius: 14px;
+        ">
+          <h1 style="margin-top: 0;">
+            ${title}
+          </h1>
+
+          <pre style="
+            padding: 16px;
+            overflow: auto;
+            white-space: pre-wrap;
+            color: #ffb4bd;
+            background: #080d18;
+            border-radius: 10px;
+          "></pre>
+        </main>
+      `;
+
+      document.querySelector('pre').textContent =
+        error?.stack ||
+        error?.message ||
+        String(error);
+    }
+
+    try {
+      const shellModule = await import(
+        './js/admin-shell.js?v=1300'
+      );
+
+      const shell =
+        await shellModule.initAdminShell({
+          activeId: 'equipments-list',
+          pageTitle: 'Equipamentos',
+          pageSubtitle: 'Gerenciamento de conteúdo'
+        });
+
+      if (!shell) {
+        throw new Error(
+          'O Admin Shell não foi inicializado.'
+        );
+      }
+
+      try {
+        await import(
+          './js/equipments.js?v=1300'
+        );
+      } catch (error) {
+        showFatalError(
+          'Erro ao carregar equipments.js',
+          error
+        );
+      }
+    } catch (error) {
+      showFatalError(
+        'Erro ao carregar o Admin Shell',
+        error
+      );
+    }
+  </script>
+</body>
+</html>

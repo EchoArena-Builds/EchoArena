@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Comentários — Echo Arena Admin</title>
+
+  <link
+    rel="stylesheet"
+    href="./css/admin.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="./css/admin-shell.css"
+  >
+
+  <style>
+    .comments-page {
+      display: grid;
+      gap: 18px;
+    }
+
+    .comments-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .comments-toolbar-copy strong {
+      display: block;
+      font-size: 18px;
+    }
+
+    .comments-toolbar-copy span {
+      display: block;
+      margin-top: 5px;
+      color: var(--admin-muted);
+      font-size: 12px;
+    }
+
+    .comments-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .comments-summary-card {
+      padding: 14px;
+      border: 1px solid var(--admin-line);
+      border-radius: 12px;
+      background: var(--admin-panel);
+    }
+
+    .comments-summary-card span {
+      display: block;
+      color: var(--admin-muted);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .comments-summary-card strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 26px;
+      line-height: 1;
+    }
+
+    .comments-filters {
+      display: grid;
+      grid-template-columns:
+        minmax(220px, 1fr)
+        minmax(150px, 190px)
+        minmax(150px, 190px)
+        minmax(120px, 150px);
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--admin-line);
+      border-radius: 14px;
+      background: var(--admin-panel);
+    }
+
+    .comments-filter-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .comments-filter-field label {
+      color: #c8cfdd;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .comments-context {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 12px 16px;
+      border: 1px solid #3c3266;
+      border-radius: 12px;
+      background: #1a1435;
+      font-size: 12px;
+    }
+
+    .comments-context.is-visible {
+      display: flex;
+    }
+
+    .comments-message {
+      min-height: 22px;
+      color: var(--admin-muted);
+      font-size: 13px;
+    }
+
+    .comments-message.error {
+      color: #ff8585;
+    }
+
+    .comments-message.ok {
+      color: #4ade80;
+    }
+
+    .comments-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .comment-card {
+      display: grid;
+      gap: 12px;
+      min-width: 0;
+      padding: 15px 16px;
+      border: 1px solid var(--admin-line);
+      border-left-width: 3px;
+      border-radius: 12px;
+      background: var(--admin-panel);
+    }
+
+    .comment-card.is-hidden {
+      border-left-color: #d97706;
+      background: #1c1508;
+    }
+
+    .comment-card.is-deleted {
+      border-left-color: #f87171;
+      background: #1b0f16;
+      opacity: 0.75;
+    }
+
+    .comment-card.is-pinned {
+      border-left-color: #8b5cf6;
+    }
+
+    .comment-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .comment-author {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
+
+    .comment-avatar {
+      flex: 0 0 36px;
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--admin-line);
+      border-radius: 9px;
+      background: #07101f;
+      color: var(--admin-muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .comment-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .comment-author-copy {
+      min-width: 0;
+    }
+
+    .comment-author-copy strong {
+      display: block;
+      font-size: 12.5px;
+    }
+
+    .comment-author-copy span {
+      display: block;
+      margin-top: 3px;
+      color: var(--admin-muted);
+      font-size: 10px;
+    }
+
+    .comment-flags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .comment-badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 21px;
+      padding: 4px 8px;
+      border: 1px solid #3c3266;
+      border-radius: 999px;
+      background: #1d1638;
+      color: #c9b7ff;
+      font-size: 8.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .comment-badge.hidden {
+      border-color: #6f5618;
+      background: #2a2009;
+      color: #ffd76d;
+    }
+
+    .comment-badge.deleted {
+      border-color: #71303b;
+      background: #2a1016;
+      color: #ff9aaa;
+    }
+
+    .comment-badge.pinned {
+      border-color: #4c3a86;
+      background: #1d1638;
+      color: #c9b7ff;
+    }
+
+    .comment-body {
+      padding: 12px 14px;
+      border: 1px solid var(--admin-line);
+      border-radius: 10px;
+      background: #09111f;
+      font-size: 12.5px;
+      line-height: 1.65;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .comment-meta {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      color: var(--admin-muted);
+      font-size: 10px;
+    }
+
+    .comment-meta a {
+      color: #b99eff;
+      text-decoration: none;
+    }
+
+    .comment-meta a:hover {
+      text-decoration: underline;
+    }
+
+    .comment-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .comment-actions .admin-button {
+      min-height: 33px;
+      padding: 7px 12px;
+      font-size: 10px;
+    }
+
+    .comment-actions .danger {
+      color: #ff9aaa;
+      border-color: #71303b;
+      background: #2a1016;
+    }
+
+    .comments-empty {
+      padding: 36px;
+      border: 1px dashed var(--admin-line);
+      border-radius: 14px;
+      background: var(--admin-panel);
+      color: var(--admin-muted);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .comments-pagination {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 4px 2px;
+    }
+
+    .comments-pagination-info {
+      color: var(--admin-muted);
+      font-size: 11px;
+    }
+
+    .comments-pagination-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .comments-pagination-controls .admin-button {
+      min-height: 34px;
+      padding: 7px 13px;
+      font-size: 11px;
+    }
+
+    @media (max-width: 1100px) {
+      .comments-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .comments-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 780px) {
+      .comments-filters {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div data-admin-content>
+    <section class="comments-page">
+
+      <header class="comments-toolbar">
+        <div class="comments-toolbar-copy">
+          <strong>
+            Moderação de comentários
+          </strong>
+
+          <span>
+            Oculte, fixe ou remova comentários da comunidade.
+          </span>
+        </div>
+
+        <div>
+          <button
+            id="refresh"
+            class="admin-button"
+            type="button"
+          >
+            Atualizar
+          </button>
+        </div>
+      </header>
+
+      <section class="comments-summary">
+        <div class="comments-summary-card">
+          <span>Total</span>
+          <strong id="summary-total">—</strong>
+        </div>
+
+        <div class="comments-summary-card">
+          <span>Ocultos</span>
+          <strong id="summary-hidden">—</strong>
+        </div>
+
+        <div class="comments-summary-card">
+          <span>Removidos</span>
+          <strong id="summary-deleted">—</strong>
+        </div>
+
+        <div class="comments-summary-card">
+          <span>Últimos 7 dias</span>
+          <strong id="summary-recent">—</strong>
+        </div>
+      </section>
+
+      <div
+        id="context-bar"
+        class="comments-context"
+      >
+        <span id="context-label">—</span>
+
+        <a
+          class="admin-button"
+          href="./comments.html"
+        >
+          Limpar filtro
+        </a>
+      </div>
+
+      <section class="comments-filters">
+        <div class="comments-filter-field">
+          <label for="search">
+            Buscar no texto
+          </label>
+
+          <input
+            id="search"
+            class="admin-input"
+            type="search"
+            placeholder="Palavra ou trecho..."
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="comments-filter-field">
+          <label for="status-filter">
+            Situação
+          </label>
+
+          <select
+            id="status-filter"
+            class="admin-select"
+          >
+            <option value="visible">Visíveis</option>
+            <option value="all">Todos</option>
+            <option value="hidden">Ocultos</option>
+            <option value="deleted">Removidos</option>
+            <option value="pinned">Fixados</option>
+          </select>
+        </div>
+
+        <div class="comments-filter-field">
+          <label for="sort-filter">
+            Ordenar
+          </label>
+
+          <select
+            id="sort-filter"
+            class="admin-select"
+          >
+            <option value="recent">Mais recentes</option>
+            <option value="oldest">Mais antigos</option>
+            <option value="likes">Mais curtidos</option>
+          </select>
+        </div>
+
+        <div class="comments-filter-field">
+          <label for="page-size">
+            Por página
+          </label>
+
+          <select
+            id="page-size"
+            class="admin-select"
+          >
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+      </section>
+
+      <div
+        id="message"
+        class="comments-message"
+        role="status"
+        aria-live="polite"
+      ></div>
+
+      <section
+        id="comments-list"
+        class="comments-list"
+      >
+        <div class="comments-empty">
+          Carregando comentários...
+        </div>
+      </section>
+
+      <div class="comments-pagination">
+        <div
+          id="pagination-info"
+          class="comments-pagination-info"
+        >
+          —
+        </div>
+
+        <div class="comments-pagination-controls">
+          <button
+            id="prev-page"
+            class="admin-button"
+            type="button"
+          >
+            Anterior
+          </button>
+
+          <button
+            id="next-page"
+            class="admin-button"
+            type="button"
+          >
+            Próxima
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    import {
+      initAdminShell
+    } from './js/admin-shell.js';
+
+    const shell =
+      await initAdminShell({
+        activeId: 'comments',
+        pageTitle: 'Comentários',
+        pageSubtitle: 'Moderação da comunidade'
+      });
+
+    if (shell) {
+      await import(
+        './js/comments.js'
+      );
+    }
+  </script>
+</body>
+</html>

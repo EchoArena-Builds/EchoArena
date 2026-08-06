@@ -1,0 +1,503 @@
+/* =========================================================
+   ECHO ARENA — PAINEL ADMINISTRATIVO
+   Estilos base: variáveis, tipografia, formulários, botões,
+   tabelas e utilitários.
+
+   A casca (sidebar, topbar, layout) fica em admin-shell.css.
+   Cada página adiciona apenas o CSS do próprio conteúdo.
+   ========================================================= */
+
+:root{
+  /* superfícies */
+  --admin-bg:#070b14;
+  --admin-panel:#0f1728;
+  --admin-panel-2:#111c31;
+  --admin-panel-3:#09111f;
+  --admin-input:#08101e;
+
+  /* linhas */
+  --admin-line:#26344f;
+  --admin-line-2:#33415f;
+
+  /* texto */
+  --admin-text:#f5f7ff;
+  --admin-muted:#9da8bd;
+  --admin-faint:#65718a;
+
+  /* marca */
+  --admin-purple:#8b5cf6;
+  --admin-purple-dark:#6d28d9;
+  --admin-purple-light:#b99eff;
+
+  /* estados */
+  --admin-green:#4ade80;
+  --admin-red:#ff8585;
+  --admin-amber:#ffd76d;
+
+  --admin-radius:12px;
+  --admin-font:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+
+/* ---------------------------------------------------------
+   BASE
+--------------------------------------------------------- */
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+html,body{min-height:100%}
+
+body{
+  background:var(--admin-bg);
+  color:var(--admin-text);
+  font-family:var(--admin-font);
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+
+a{color:inherit;text-decoration:none}
+a:hover{color:var(--admin-purple-light)}
+
+img,video{display:block;max-width:100%}
+
+h1,h2,h3,h4{line-height:1.2;font-weight:700}
+h1{font-size:34px}
+h2{font-size:22px}
+h3{font-size:17px}
+h4{font-size:14px}
+
+p{margin:0}
+
+::selection{background:#8b5cf655}
+
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--admin-line);border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:var(--admin-line-2)}
+
+/* ---------------------------------------------------------
+   FORMULÁRIOS
+--------------------------------------------------------- */
+
+.admin-input,
+.admin-select,
+.admin-textarea{
+  width:100%;
+  min-height:44px;
+  padding:11px 13px;
+  border:1px solid var(--admin-line);
+  border-radius:10px;
+  background:var(--admin-input);
+  color:var(--admin-text);
+  font-family:inherit;
+  font-size:13.5px;
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+
+.admin-textarea{
+  min-height:96px;
+  line-height:1.6;
+  resize:vertical;
+}
+
+.admin-input::placeholder,
+.admin-textarea::placeholder{color:var(--admin-faint)}
+
+.admin-input:focus,
+.admin-select:focus,
+.admin-textarea:focus{
+  outline:none;
+  border-color:var(--admin-purple);
+  box-shadow:0 0 0 3px rgba(139,92,246,.18);
+}
+
+.admin-input:disabled,
+.admin-select:disabled,
+.admin-textarea:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+/* seta do select */
+.admin-select{
+  appearance:none;
+  padding-right:34px;
+  background-image:linear-gradient(45deg,transparent 50%,var(--admin-muted) 50%),
+                   linear-gradient(135deg,var(--admin-muted) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;
+  background-size:5px 5px,5px 5px;
+  background-repeat:no-repeat;
+}
+
+.admin-select option{background:var(--admin-panel);color:var(--admin-text)}
+
+input[type="color"]{cursor:pointer}
+input[type="range"]{accent-color:var(--admin-purple)}
+input[type="checkbox"],
+input[type="radio"]{accent-color:var(--admin-purple);cursor:pointer}
+
+input[type="file"].admin-input{
+  padding:9px 12px;
+  font-size:12.5px;
+  cursor:pointer;
+}
+
+label{font-size:12px}
+
+/* ---------------------------------------------------------
+   BOTÕES
+--------------------------------------------------------- */
+
+.admin-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:44px;
+  padding:11px 17px;
+  border:1px solid var(--admin-line-2);
+  border-radius:10px;
+  background:var(--admin-panel-2);
+  color:var(--admin-text);
+  font-family:inherit;
+  font-size:12.5px;
+  font-weight:700;
+  letter-spacing:.02em;
+  text-align:center;
+  text-decoration:none;
+  cursor:pointer;
+  transition:background .15s ease,border-color .15s ease,transform .15s ease;
+}
+
+.admin-button:hover{
+  background:#17213a;
+  color:var(--admin-text);
+  transform:translateY(-1px);
+}
+
+.admin-button:active{transform:translateY(0)}
+
+.admin-button:disabled,
+.admin-button[disabled]{
+  opacity:.55;
+  cursor:not-allowed;
+  transform:none;
+}
+
+.admin-button.primary{
+  border-color:transparent;
+  background:linear-gradient(180deg,var(--admin-purple),var(--admin-purple-dark));
+  color:#fff;
+  box-shadow:0 8px 22px -10px rgba(139,92,246,.9);
+}
+
+.admin-button.primary:hover{filter:brightness(1.08)}
+
+.admin-button.danger{
+  border-color:#71303b;
+  background:#2a1016;
+  color:#ff9aaa;
+}
+
+.admin-button.danger:hover{background:#37151d}
+
+.admin-button.ghost{
+  border-color:var(--admin-line);
+  background:transparent;
+  color:var(--admin-muted);
+}
+
+.admin-button.ghost:hover{color:var(--admin-text)}
+
+/* ---------------------------------------------------------
+   SUPERFÍCIES
+--------------------------------------------------------- */
+
+.admin-card,
+.admin-panel-box{
+  padding:18px;
+  border:1px solid var(--admin-line);
+  border-radius:14px;
+  background:var(--admin-panel);
+}
+
+.admin-divider{
+  height:1px;
+  margin:18px 0;
+  border:0;
+  background:var(--admin-line);
+}
+
+.admin-badge{
+  display:inline-flex;
+  align-items:center;
+  min-height:22px;
+  padding:4px 9px;
+  border:1px solid #3c3266;
+  border-radius:999px;
+  background:#1d1638;
+  color:#c9b7ff;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+
+.admin-badge.ok{border-color:#28613c;background:#0c2918;color:#8bf0aa}
+.admin-badge.warn{border-color:#6f5618;background:#2a2009;color:var(--admin-amber)}
+.admin-badge.danger{border-color:#71303b;background:#2a1016;color:#ff9aaa}
+
+/* ---------------------------------------------------------
+   MENSAGENS
+--------------------------------------------------------- */
+
+.message,
+#message{
+  min-height:22px;
+  color:var(--admin-muted);
+  font-size:13px;
+}
+
+.message.error,
+#message.error{color:var(--admin-red)}
+
+.message.ok,
+#message.ok{color:var(--admin-green)}
+
+/* ---------------------------------------------------------
+   TABELAS
+--------------------------------------------------------- */
+
+.admin-table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13px;
+}
+
+.admin-table th{
+  padding:11px 12px;
+  border-bottom:1px solid var(--admin-line);
+  color:var(--admin-muted);
+  font-size:10.5px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  text-align:left;
+}
+
+.admin-table td{
+  padding:12px;
+  border-bottom:1px solid var(--admin-line);
+}
+
+.admin-table tr:last-child td{border-bottom:0}
+.admin-table tbody tr:hover{background:var(--admin-panel-3)}
+
+/* ---------------------------------------------------------
+   ESTADOS VAZIOS
+--------------------------------------------------------- */
+
+.admin-empty{
+  padding:32px;
+  border:1px dashed var(--admin-line);
+  border-radius:12px;
+  background:var(--admin-panel);
+  color:var(--admin-muted);
+  font-size:12px;
+  line-height:1.6;
+  text-align:center;
+}
+
+/* ---------------------------------------------------------
+   UTILITÁRIOS
+--------------------------------------------------------- */
+
+.hidden{display:none !important}
+.muted{color:var(--admin-muted)}
+.faint{color:var(--admin-faint)}
+.text-center{text-align:center}
+.text-right{text-align:right}
+.full-width{width:100%}
+.nowrap{white-space:nowrap}
+
+.truncate{
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+.stack{display:grid;gap:12px}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.row.between{justify-content:space-between}
+.row.end{justify-content:flex-end}
+
+/* ---------------------------------------------------------
+   LAYOUT ANTIGO (páginas que ainda não usam o admin-shell)
+--------------------------------------------------------- */
+
+.sidebar{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  padding:20px 14px;
+  border-right:1px solid var(--admin-line);
+  background:var(--admin-panel);
+}
+
+.sidebar a{
+  padding:11px 14px;
+  border-radius:9px;
+  color:var(--admin-muted);
+  font-size:12.5px;
+  font-weight:600;
+}
+
+.sidebar a:hover{background:var(--admin-panel-2);color:var(--admin-text)}
+.sidebar a.active{background:var(--admin-panel-2);color:#fff}
+
+/* ---------------------------------------------------------
+   RESPONSIVO
+--------------------------------------------------------- */
+
+@media(max-width:760px){
+  h1{font-size:26px}
+  h2{font-size:19px}
+
+  .admin-card,
+  .admin-panel-box{padding:15px}
+
+  .admin-button{width:100%}
+  .row .admin-button{width:auto}
+}
+
+/* ---------------------------------------------------------
+   LAYOUT LEGADO — equipment-editor.html e equipment-import.html
+   Essas duas páginas têm cabeçalho próprio, anterior ao
+   admin-shell. Mantidas aqui até serem migradas.
+--------------------------------------------------------- */
+
+.equipment-page{
+  display:grid;
+  grid-template-columns:230px minmax(0,1fr);
+  min-height:100vh;
+  background:var(--admin-bg);
+  color:var(--admin-text);
+}
+
+.equipment-main{
+  min-width:0;
+  padding:28px;
+}
+
+.equipment-page .sidebar{
+  position:sticky;
+  top:0;
+  align-self:start;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  height:100vh;
+  padding:22px 16px;
+  overflow-y:auto;
+  border-right:1px solid var(--admin-line);
+  background:var(--admin-panel);
+}
+
+.equipment-page .brand{
+  padding:0 8px 14px;
+  font-size:20px;
+  font-weight:800;
+  letter-spacing:.02em;
+}
+
+.equipment-page .brand span{color:var(--admin-purple-light)}
+
+.equipment-page .sidebar nav{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+
+.equipment-page .sidebar nav a{
+  display:block;
+  padding:11px 14px;
+  border-radius:10px;
+  color:var(--admin-muted);
+  font-size:13px;
+  font-weight:600;
+  text-decoration:none;
+  transition:background .15s ease,color .15s ease;
+}
+
+.equipment-page .sidebar nav a:hover{
+  background:var(--admin-panel-2);
+  color:var(--admin-text);
+}
+
+.equipment-page .sidebar nav a.active{
+  background:linear-gradient(180deg,var(--admin-purple),var(--admin-purple-dark));
+  color:#fff;
+  box-shadow:0 8px 22px -12px rgba(139,92,246,.9);
+}
+
+/* botão genérico do layout legado */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  padding:11px 16px;
+  border:1px solid var(--admin-line-2);
+  border-radius:10px;
+  background:var(--admin-panel-2);
+  color:var(--admin-text);
+  font-family:inherit;
+  font-size:12.5px;
+  font-weight:700;
+  cursor:pointer;
+  transition:background .15s ease;
+}
+
+.btn:hover{background:#17213a}
+
+.btn.ghost{
+  border-color:var(--admin-line);
+  background:transparent;
+  color:var(--admin-muted);
+}
+
+.btn.ghost:hover{
+  background:var(--admin-panel-2);
+  color:var(--admin-text);
+}
+
+.eyebrow{
+  color:var(--admin-purple-light);
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+}
+
+@media(max-width:900px){
+  .equipment-page{grid-template-columns:minmax(0,1fr)}
+
+  .equipment-page .sidebar{
+    position:static;
+    height:auto;
+    flex-direction:row;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:8px;
+    border-right:0;
+    border-bottom:1px solid var(--admin-line);
+  }
+
+  .equipment-page .brand{padding:0 8px 0 0}
+  .equipment-page .sidebar nav{flex:1;flex-direction:row;flex-wrap:wrap}
+  .equipment-page .sidebar .btn{width:auto}
+
+  .equipment-main{padding:16px}
+}
