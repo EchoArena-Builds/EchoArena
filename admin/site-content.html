@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="./css/admin.css">
   <link rel="stylesheet" href="./css/admin-shell.css">
   <link rel="stylesheet" href="./css/site-content.css?v=2">
+  <link rel="stylesheet" href="./css/site-content-modular.css?v=1">
   <link rel="stylesheet" href="../css/echo-theme.css?v=2">
 </head>
 <body>
@@ -41,7 +42,9 @@
         <p>Execute o arquivo <code>site-content-cms.sql</code> no SQL Editor do Supabase. O site continuará usando os textos atuais até isso ser feito.</p>
       </div>
 
-      <div class="content-workspace">
+      <nav id="content-editor-tabs" class="content-editor-tabs" aria-label="Seções do editor"></nav>
+
+      <div id="content-workspace" class="content-workspace">
         <section class="editor-column">
           <div id="content-fields" class="content-fields"><div class="content-loading">Carregando conteúdo…</div></div>
         </section>
@@ -56,17 +59,19 @@
 
   <template id="image-field-template">
     <div class="image-editor">
-      <div class="image-preview"><img alt="Prévia"><span>Nenhuma imagem personalizada</span></div>
+      <div class="image-preview"><img alt="Prévia" draggable="false"><span>Nenhuma imagem personalizada</span><b class="image-drag-hint">Arraste para posicionar</b></div>
       <div class="image-actions">
         <label class="admin-button primary upload-button">Escolher imagem<input type="file" accept="image/png,image/jpeg,image/webp,image/avif,image/gif"></label>
         <button class="admin-button remove-image" type="button">Usar imagem padrão</button>
       </div>
       <label class="subfield"><span>Ou cole a URL da imagem</span><input class="admin-input image-url" type="url" placeholder="https://..."></label>
+      <label class="image-zoom-control"><span>Zoom <output class="image-zoom-value">100%</output></span><input class="image-zoom" type="range" min="50" max="200" step="1" value="100"></label>
       <div class="image-settings">
         <label class="subfield"><span>Texto alternativo</span><input class="admin-input image-alt" maxlength="140" placeholder="Descreva a imagem"></label>
-        <label class="subfield"><span>Enquadramento</span><select class="admin-select image-position"><option value="50% 50%">Centro</option><option value="50% 20%">Topo</option><option value="50% 80%">Base</option><option value="20% 50%">Esquerda</option><option value="80% 50%">Direita</option></select></label>
+        <input class="image-position" type="hidden" value="50% 50%">
         <label class="subfield"><span>Ajuste</span><select class="admin-select image-fit"><option value="cover">Preencher área</option><option value="contain">Mostrar inteira</option></select></label>
       </div>
+      <div class="image-position-actions"><span>Posição <b class="image-position-value">X 50% · Y 50%</b></span><button class="admin-button center-image" type="button">Centralizar</button></div>
       <div class="upload-progress" hidden><i></i><span>Enviando imagem…</span></div>
     </div>
   </template>
@@ -78,7 +83,7 @@
       pageTitle: 'Conteúdo do site',
       pageSubtitle: 'Editor visual das páginas'
     });
-    if (shell) await import('./js/site-content.js?v=5');
+    if (shell) await import('./js/site-content.js?v=6');
   </script>
 </body>
 </html>
