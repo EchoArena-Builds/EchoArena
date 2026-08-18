@@ -8,58 +8,91 @@
   <script src="./js/guard.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./css/criar-build.css?v=11">
-  <link rel="stylesheet" href="./css/analise.css?v=11">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/criar-build.css?v=51">
+  <link rel="stylesheet" href="./css/analise.css?v=31">
+  <link rel="stylesheet" href="./css/echo-theme.css?v=1">
 </head>
-<body>
-  <header class="top">
+<body data-cms-page="build_creator">
+  <header class="topbar">
     <a class="brand" href="./index.html" aria-label="Echo Arena — início">
-      <span class="mk" aria-hidden="true"></span>
+      <span class="brand-mark" aria-hidden="true"></span>
       <b>ECHO <span>ARENA</span></b>
     </a>
 
-    <nav class="nav" aria-label="Navegação principal">
+    <nav class="mainnav" aria-label="Navegação principal">
       <a href="./herois.html">Heróis</a>
-      <a href="#">Classes</a>
       <a class="on" href="./criar-build.html">Builds</a>
       <a href="./equipamentos.html">Equipamentos</a>
       <a href="#impacto">Estatísticas</a>
-      <a href="#sinergias">Composições</a>
-      <a href="#">Tier list</a>
-      <a href="#">Guias</a>
-      <a href="#">Notícias</a>
     </nav>
 
-    <label class="srch" aria-label="Buscar">
-      <span aria-hidden="true">⌕</span>
-      <input type="search" placeholder="Buscar heróis, habilidades...">
-    </label>
+    <div class="top-actions">
+      <label class="search" aria-label="Buscar">
+        <span aria-hidden="true">⌕</span>
+        <input type="search" placeholder="Buscar heróis, habilidades...">
+      </label>
 
-    <div class="usr">
-      <div class="av media ph" id="user-av"></div>
-      <div class="nm" id="user-nm">Minha conta<small>Conectado</small></div>
+      <div class="usr">
+        <div class="av media ph" id="user-av"></div>
+        <div class="nm" id="user-nm">Minha conta<small>Conectado</small></div>
+      </div>
+
+      <button class="menu-toggle" id="sidebar-open" type="button" aria-label="Abrir menu" aria-controls="site-sidebar" aria-expanded="false"><span class="menu-toggle-lines" aria-hidden="true"></span></button>
     </div>
-    <button class="burger" id="burger" type="button" aria-label="Abrir menu" aria-expanded="false">☰</button>
   </header>
 
-  <aside class="mobile-drawer" id="side" aria-label="Menu móvel">
-    <div class="drawer-title"><b>ECHO <span>ARENA</span></b><button type="button" data-close-menu>×</button></div>
-    <a href="./index.html">Início</a><a href="./herois.html">Heróis</a><a href="#">Classes</a>
-    <a class="on" href="./criar-build.html">Builds</a><a href="./equipamentos.html">Equipamentos</a>
-    <a href="#impacto">Estatísticas</a><a href="#sinergias">Composições</a>
-    <a href="#">Tier list</a><a href="#">Guias</a><a href="#">Notícias</a>
+  <div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
+  <aside class="site-sidebar" id="site-sidebar" aria-hidden="true" aria-label="Centro de navegação Echo Arena">
+    <div class="sidebar-head">
+      <div class="sidebar-brand"><span class="brand-mark" aria-hidden="true"></span><div><strong>ECHO ARENA</strong><small>Centro de navegação</small></div></div>
+      <button class="sidebar-close" id="sidebar-close" type="button" aria-label="Fechar menu">×</button>
+    </div>
+    <div class="sidebar-scroll">
+      <section class="sidebar-section">
+        <div class="sidebar-label">Explorar</div>
+        <nav class="sidebar-links" aria-label="Explorar Echo Arena">
+          <a class="sidebar-link" href="./index.html"><span class="sidebar-link-icon">⌂</span><span><strong>Início</strong><small>Página principal da arena</small></span></a>
+          <a class="sidebar-link" href="./herois.html"><span class="sidebar-link-icon">♟</span><span><strong>Heróis</strong><small>Lista, funções e atributos</small></span></a>
+          <a class="sidebar-link active" href="./criar-build.html"><span class="sidebar-link-icon">◇</span><span><strong>Builds</strong><small>Monte e analise sua configuração</small></span></a>
+          <a class="sidebar-link" href="./equipamentos.html"><span class="sidebar-link-icon">✣</span><span><strong>Equipamentos</strong><small>Itens, raridades e status</small></span></a>
+          <a class="sidebar-link" href="#impacto"><span class="sidebar-link-icon">⌁</span><span><strong>Estatísticas</strong><small>Impacto desta build</small></span></a>
+          <a class="sidebar-link" href="#" data-coming-soon="Classes"><span class="sidebar-link-icon">◆</span><span><strong>Classes</strong><small>Funções e estilos de combate</small></span><span class="sidebar-badge">Em breve</span></a>
+          <a class="sidebar-link" href="#sinergias"><span class="sidebar-link-icon">◉</span><span><strong>Composições</strong><small>Sinergia dos equipamentos</small></span></a>
+          <a class="sidebar-link" href="#" data-coming-soon="Tier List"><span class="sidebar-link-icon">★</span><span><strong>Tier List</strong><small>Ranking competitivo de heróis</small></span><span class="sidebar-badge">Em breve</span></a>
+        </nav>
+      </section>
+      <section class="sidebar-section">
+        <div class="sidebar-label">Conteúdo e comunidade</div>
+        <nav class="sidebar-links" aria-label="Conteúdo e comunidade">
+          <a class="sidebar-link" href="#" data-coming-soon="Guias"><span class="sidebar-link-icon">▤</span><span><strong>Guias</strong><small>Estratégias, mapas e mecânicas</small></span><span class="sidebar-badge">Em breve</span></a>
+          <a class="sidebar-link external" href="https://github.com/EchoArena-Builds/EchoArena/commits/main/" target="_blank" rel="noopener"><span class="sidebar-link-icon">◫</span><span><strong>Notícias e atualizações</strong><small>Acompanhe as mudanças do projeto</small></span><span class="sidebar-badge">Abrir ↗</span></a>
+          <a class="sidebar-link external" href="https://github.com/EchoArena-Builds/EchoArena" target="_blank" rel="noopener"><span class="sidebar-link-icon">◎</span><span><strong>Sobre o projeto</strong><small>Código, histórico e documentação</small></span><span class="sidebar-badge">Abrir ↗</span></a>
+        </nav>
+      </section>
+      <section class="sidebar-section">
+        <div class="sidebar-label">Ajuda e suporte</div>
+        <nav class="sidebar-links" aria-label="Ajuda e suporte">
+          <a class="sidebar-link external" href="https://github.com/EchoArena-Builds/EchoArena/issues/new?title=Contato%20pelo%20Echo%20Arena" target="_blank" rel="noopener"><span class="sidebar-link-icon">✉</span><span><strong>Contate-nos</strong><small>Dúvidas, sugestões e parcerias</small></span><span class="sidebar-badge">Abrir ↗</span></a>
+          <a class="sidebar-link external" href="https://github.com/EchoArena-Builds/EchoArena/issues/new?title=Relato%20de%20problema&amp;labels=bug" target="_blank" rel="noopener"><span class="sidebar-link-icon">!</span><span><strong>Reportar problema</strong><small>Informe erros encontrados no site</small></span><span class="sidebar-badge">Abrir ↗</span></a>
+        </nav>
+      </section>
+      <section class="sidebar-section" data-cms-visible="show_news">
+        <div class="sidebar-news"><div class="sidebar-news-kicker" data-cms-text="news_kicker">Atualização recente</div><h3 data-cms-text="news_title">A arena está evoluindo</h3><p data-cms-text="news_description">Novo frontend, experiência mobile aprimorada e telão dinâmico individual para cada herói.</p><a href="https://github.com/EchoArena-Builds/EchoArena/commits/main/" data-cms-link="news_url" target="_blank" rel="noopener">Ver histórico de atualizações →</a></div>
+      </section>
+    </div>
+    <footer class="sidebar-footer"><strong>Echo Arena</strong><br>Ferramenta comunitária independente para criação e análise de builds.</footer>
   </aside>
-  <button class="drawer-backdrop" type="button" data-close-menu aria-label="Fechar menu"></button>
+  <div class="nav-toast" id="nav-toast" role="status" aria-live="polite"></div>
 
   <main class="builder-page">
     <div class="lab-glow" aria-hidden="true"></div>
 
-    <section class="workbench-zone">
+    <section class="workbench-zone" data-cms-bg="stage_background">
       <aside class="hero-column">
         <div class="page-kicker"><i aria-hidden="true">✥</i> LABORATÓRIO TÁTICO</div>
-        <h1>MESA DE SINERGIAS</h1>
-        <p class="page-subtitle">Construa a estratégia ao redor do seu herói.</p>
+        <h1 data-cms-text="page_title">MESA DE SINERGIAS</h1>
+        <p class="page-subtitle" data-cms-text="page_subtitle">Construa a estratégia ao redor do seu herói.</p>
 
         <article class="hero-panel">
           <div class="hero-identity">
@@ -162,10 +195,10 @@
     </section>
 
     <nav class="mobile-steps" id="steps" aria-label="Etapas da build">
-      <button class="step on" type="button" data-s="1"><span class="n">1</span><b>Herói</b></button>
-      <button class="step" type="button" data-s="2"><span class="n">2</span><b>Equipar</b></button>
-      <button class="step" type="button" data-s="3"><span class="n">3</span><b>Analisar</b></button>
-      <button class="step" type="button" data-s="4"><span class="n">4</span><b>Salvar</b></button>
+      <button class="step on" type="button" data-s="1" title="Etapa 1 — Escolher herói"><span class="n">1</span><b>Herói</b></button>
+      <button class="step" type="button" data-s="2" title="Etapa 2 — Escolher equipamentos"><span class="n">2</span><b>Equipamentos</b></button>
+      <button class="step" type="button" data-s="3" title="Etapa 3 — Analisar a build"><span class="n">3</span><b>Análise</b></button>
+      <button class="step" type="button" data-s="4" title="Etapa 4 — Finalizar e salvar"><span class="n">4</span><b>Salvar</b></button>
     </nav>
     <div class="mobile-progress" aria-hidden="true"><i id="prog-bar" style="width:25%"></i><span id="prog-pct">25%</span></div>
   </main>
@@ -178,13 +211,30 @@
   <button class="modal-backdrop" id="hero-picker-backdrop" type="button" hidden aria-label="Fechar seleção"></button>
 
   <div class="pop-back" id="pop-back" hidden></div>
-  <div class="pop" id="pop" hidden role="dialog" aria-modal="true" aria-label="Escolher equipamento">
-    <span class="pop-arrow" id="pop-arrow"></span>
-    <div class="pop-top"><div><span class="pop-eyebrow" id="pop-eyebrow">Slot</span><h3 id="pop-title">Escolher equipamento</h3></div><button class="pop-x" id="pop-close" type="button">×</button></div>
-    <div class="pop-search" id="pop-search-wrap" hidden><input id="pop-search" type="search" placeholder="Buscar equipamento..." autocomplete="off"></div>
-    <div class="pop-grid" id="ilist"></div>
-    <div class="pop-detail" id="equipment-detail">Selecione um item para conferir seus bônus.</div>
-    <div class="pop-foot" id="pop-foot" hidden><button id="pop-clear" type="button">Remover do slot</button></div>
+  <div class="pop equipment-window" id="pop" hidden role="dialog" aria-modal="false" aria-label="Escolher equipamento">
+    <div class="strip-head pop-strip-head">
+      <div class="strip-head-copy">
+        <span class="sh-title" id="pop-strip-head-count">Seus equipamentos</span>
+        <span class="sh-underline"></span>
+      </div>
+      <div class="sh-tools pop-top-tools">
+        <button class="d-close pop-x" type="button" data-close-pop aria-label="Fechar"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+      </div>
+    </div>
+
+    <div class="pop-search" id="pop-search-wrap" hidden>
+      <input id="pop-search" type="search" placeholder="Buscar equipamento..." autocomplete="off">
+    </div>
+
+    <div class="strip pop-strip" id="ilist" role="listbox" aria-label="Equipamentos"></div>
+
+    <section class="detail pop-detail" id="equipment-detail">
+      <p class="empty-message">Selecione um item para conferir seus bônus.</p>
+    </section>
+
+    <div class="foot pop-foot" id="pop-foot" hidden>
+      <div class="btn-eq pop-equipped-badge"><span aria-hidden="true">✓</span><span>Item equipado</span></div>
+    </div>
   </div>
 
   <button id="next-equip" type="button" hidden>Próximo</button>
@@ -193,6 +243,7 @@
   <div id="sum-a" hidden></div><div id="sum-b" hidden></div><div id="sum-txt" hidden></div><div id="bn-count" hidden></div>
 
   <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
-  <script type="module" src="./js/criar-build.js?v=11"></script>
+  <script type="module" src="./js/criar-build.js?v=50"></script>
+  <script type="module" src="./js/site-content.js?v=5"></script>
 </body>
 </html>

@@ -86,14 +86,15 @@
   .tools{grid-template-columns:1fr}
 }
 </style>
+<link rel="stylesheet" href="./css/echo-theme.css?v=1">
 </head>
-<body>
+<body data-cms-page="heroes" data-cms-bg="page_background">
 <div data-site-content>
 
   <header class="page-head">
     <div>
-      <h1>Heróis</h1>
-      <p>Conheça todos os heróis disponíveis e suas classes.</p>
+      <h1 data-cms-text="title">Heróis</h1>
+      <p data-cms-text="subtitle">Conheça todos os heróis disponíveis e suas classes.</p>
     </div>
     <div class="page-count" id="count">—</div>
   </header>
@@ -101,7 +102,7 @@
   <section class="tools">
     <div>
       <label for="search">Buscar</label>
-      <input id="search" type="search" placeholder="Nome do herói..." autocomplete="off">
+      <input id="search" type="search" placeholder="Nome do herói..." data-cms-placeholder="search_placeholder" autocomplete="off">
     </div>
     <div>
       <label for="sort">Ordenar</label>
@@ -134,5 +135,6 @@
 
 
 <script type="module" src="./js/herois.js"></script>
+<script type="module" src="./js/site-content.js?v=5"></script>
 </body>
 </html>

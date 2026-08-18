@@ -104,14 +104,15 @@
   .tools{grid-template-columns:1fr}
 }
 </style>
+<link rel="stylesheet" href="./css/echo-theme.css?v=1">
 </head>
-<body>
+<body data-cms-page="equipments" data-cms-bg="page_background">
 <div data-site-content>
 
   <header class="page-head">
     <div>
-      <h1>Equipamentos</h1>
-      <p>Atributos por raridade, conjuntos e bônus.</p>
+      <h1 data-cms-text="title">Equipamentos</h1>
+      <p data-cms-text="subtitle">Atributos por raridade, conjuntos e bônus.</p>
     </div>
     <div class="page-count" id="count">—</div>
   </header>
@@ -119,7 +120,7 @@
   <section class="tools">
     <div>
       <label for="search">Buscar</label>
-      <input id="search" type="search" placeholder="Nome do equipamento..." autocomplete="off">
+      <input id="search" type="search" placeholder="Nome do equipamento..." data-cms-placeholder="search_placeholder" autocomplete="off">
     </div>
     <div>
       <label for="rarity">Raridade</label>
@@ -159,5 +160,6 @@
 </aside>
 
 <script type="module" src="./js/equipamentos.js"></script>
+<script type="module" src="./js/site-content.js?v=5"></script>
 </body>
 </html>
