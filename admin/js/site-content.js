@@ -134,7 +134,7 @@ function availableEditorTabs() {
 function renderEditorTabs() {
   const tabs = availableEditorTabs();
   if (!tabs.some(tab => tab.key === state.activeTab)) state.activeTab = tabs[0]?.key || 'preview';
-  elements.tabs.innerHTML = tabs.map(tab => `<button type="button" class="content-editor-tab ${tab.key === state.activeTab ? 'is-active' : ''}" data-editor-tab="${tab.key}"><strong>${tab.label}</strong><span>${tab.description}</span></button>`).join('');
+  elements.tabs.innerHTML = tabs.map(tab => `<button type="button" class="content-editor-tab ${tab.key === state.activeTab ? 'is-active' : ''}" data-editor-tab="${tab.key}">${tab.label}</button>`).join('');
   elements.workspace.classList.toggle('preview-mode', state.activeTab === 'preview');
 }
 
