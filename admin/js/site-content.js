@@ -16,6 +16,8 @@ const elements = {
   reload: document.getElementById('reload-content'),
   refresh: document.getElementById('refresh-preview'),
   preview: document.getElementById('page-preview'),
+  tabs: document.getElementById('content-editor-tabs'),
+  workspace: document.getElementById('content-workspace'),
   imageTemplate: document.getElementById('image-field-template')
 };
 
@@ -28,8 +30,18 @@ const state = {
   originalPublished: true,
   saving: false,
   uploading: 0,
-  heroes: []
+  heroes: [],
+  activeTab: 'information',
+  activeGroups: {}
 };
+
+const editorTabs = [
+  { key: 'information', label: 'Informações', description: 'SEO, títulos, descrições e filtros.' },
+  { key: 'media', label: 'Mídia', description: 'Imagens, cenários e enquadramentos.' },
+  { key: 'content', label: 'Conteúdo', description: 'Textos, ações, cards e mensagens.' },
+  { key: 'visibility', label: 'Visibilidade', description: 'Controle das seções publicadas.' },
+  { key: 'preview', label: 'Prévia', description: 'Visualização completa em tempo real.' }
+];
 
 function escapeHtml(value = '') {
   return String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;')
@@ -106,19 +118,53 @@ function renderImageField(field) {
   return `<div class="content-field image-field" data-field-key="${escapeHtml(field.key)}"><div class="content-field-head"><label>${escapeHtml(field.label)}</label><button class="field-reset" type="button" data-reset-key="${escapeHtml(field.key)}">Restaurar padrão</button></div><div data-image-editor="${escapeHtml(field.key)}"></div></div>`;
 }
 
-function renderFields() {
-  const groups = groupFields(state.page.fields);
-  elements.fields.innerHTML = Object.entries(groups).map(([name, fields], index) => {
-    const visibleFields = state.page.key === 'compare' ? fields.filter(field => !compareTransformKeys.has(field.key)) : fields;
-    const visualEditor = state.page.key === 'compare' && name === 'Aparência' ? renderCompareHeroEditor() : '';
-    return `
-    <article class="content-group ${index === 0 ? 'is-open' : ''}">
-      <button type="button" data-group-toggle><span><strong>${escapeHtml(name)}</strong><span>${visibleFields.length + (visualEditor ? 1 : 0)} ${visibleFields.length + (visualEditor ? 1 : 0) === 1 ? 'controle' : 'controles'}</span></span><i>⌄</i></button>
-      <div class="content-group-body">${visibleFields.map(field => field.type === 'image' ? renderImageField(field) : field.type === 'toggle' ? renderToggleField(field) : field.type === 'hero' ? renderHeroField(field) : renderBasicField(field)).join('')}${visualEditor}</div>
-    </article>`;
-  }).join('');
+function fieldTab(field) {
+  if (field.tab && editorTabs.some(tab => tab.key === field.tab)) return field.tab;
+  if (field.type === 'image' || compareTransformKeys.has(field.key)) return 'media';
+  if (field.type === 'toggle' || field.group === 'Visibilidade') return 'visibility';
+  if (['SEO', 'Cabeçalho', 'Filtros', 'Geral'].includes(field.group)) return 'information';
+  return 'content';
+}
 
-  state.page.fields.filter(field => field.type === 'image').forEach(mountImageEditor);
+function availableEditorTabs() {
+  const keys = new Set(state.page.fields.map(fieldTab));
+  return editorTabs.filter(tab => tab.key === 'preview' || keys.has(tab.key));
+}
+
+function renderEditorTabs() {
+  const tabs = availableEditorTabs();
+  if (!tabs.some(tab => tab.key === state.activeTab)) state.activeTab = tabs[0]?.key || 'preview';
+  elements.tabs.innerHTML = tabs.map(tab => `<button type="button" class="content-editor-tab ${tab.key === state.activeTab ? 'is-active' : ''}" data-editor-tab="${tab.key}"><strong>${tab.label}</strong><span>${tab.description}</span></button>`).join('');
+  elements.workspace.classList.toggle('preview-mode', state.activeTab === 'preview');
+}
+
+function renderFieldControl(field) {
+  if (field.type === 'image') return renderImageField(field);
+  if (field.type === 'toggle') return renderToggleField(field);
+  if (field.type === 'hero') return renderHeroField(field);
+  return renderBasicField(field);
+}
+
+function renderFields() {
+  renderEditorTabs();
+  if (state.activeTab === 'preview') {
+    elements.fields.innerHTML = '';
+    return;
+  }
+
+  const tabFields = state.page.fields.filter(field => fieldTab(field) === state.activeTab && !compareTransformKeys.has(field.key));
+  const groups = groupFields(tabFields);
+  const names = Object.keys(groups);
+  const storedGroup = state.activeGroups[state.activeTab];
+  const activeGroup = names.includes(storedGroup) ? storedGroup : names[0];
+  state.activeGroups[state.activeTab] = activeGroup;
+  const tab = editorTabs.find(item => item.key === state.activeTab);
+  const groupNav = names.length > 1 ? `<nav class="content-subtabs" aria-label="Áreas de ${tab?.label || 'edição'}">${names.map(name => `<button type="button" class="${name === activeGroup ? 'is-active' : ''}" data-editor-group="${escapeHtml(name)}">${escapeHtml(name)}</button>`).join('')}</nav>` : '';
+  const fields = groups[activeGroup] || [];
+  const visualEditor = state.page.key === 'compare' && state.activeTab === 'media' ? renderCompareHeroEditor() : '';
+  elements.fields.innerHTML = `${groupNav}<article class="content-section-card"><header><div><small>${escapeHtml(tab?.label || '')}</small><h2>${escapeHtml(activeGroup || tab?.label || '')}</h2><p>${escapeHtml(tab?.description || '')}</p></div><span>${fields.length + (visualEditor ? 1 : 0)} ${fields.length + (visualEditor ? 1 : 0) === 1 ? 'controle' : 'controles'}</span></header><div class="content-section-body ${state.activeTab === 'media' ? 'is-media' : ''}">${fields.map(renderFieldControl).join('')}${visualEditor}</div></article>`;
+
+  fields.filter(field => field.type === 'image').forEach(mountImageEditor);
   mountCompareHeroEditor();
 }
 
@@ -188,17 +234,29 @@ function mountCompareHeroEditor() {
 
 function getImage(key) {
   const value = state.content[key];
-  if (typeof value === 'string') return { url: value, alt: '', position: '50% 50%', fit: 'cover' };
-  return value && typeof value === 'object' ? value : { url: '', alt: '', position: '50% 50%', fit: 'cover' };
+  const defaults = { url: '', alt: '', position: '50% 50%', fit: 'cover', zoom: 100 };
+  if (typeof value === 'string') return { ...defaults, url: value };
+  return value && typeof value === 'object' ? { ...defaults, ...value } : defaults;
+}
+
+function imageCoordinates(image) {
+  const values = String(image.position || '50% 50%').match(/-?\d+(?:\.\d+)?/g) || [];
+  return { x: Math.max(0, Math.min(100, Number(values[0] ?? 50))), y: Math.max(0, Math.min(100, Number(values[1] ?? 50))) };
 }
 
 function updateImagePreview(editor, image) {
   const preview = editor.querySelector('.image-preview');
   const tag = preview.querySelector('img');
+  const { x, y } = imageCoordinates(image);
+  const zoom = Math.max(50, Math.min(200, Number(image.zoom ?? 100)));
   tag.src = image.url || '';
   tag.alt = image.alt || '';
-  tag.style.objectPosition = image.position || '50% 50%';
   tag.style.objectFit = image.fit || 'cover';
+  tag.style.transform = `translate(${-50 + (x - 50)}%, ${-50 + (y - 50)}%) scale(${zoom / 100})`;
+  editor.querySelector('.image-position').value = `${Math.round(x)}% ${Math.round(y)}%`;
+  editor.querySelector('.image-position-value').textContent = `X ${Math.round(x)}% · Y ${Math.round(y)}%`;
+  editor.querySelector('.image-zoom').value = String(zoom);
+  editor.querySelector('.image-zoom-value').textContent = `${Math.round(zoom)}%`;
   preview.classList.toggle('has-image', Boolean(image.url));
 }
 
@@ -208,10 +266,12 @@ function mountImageEditor(field) {
   host.appendChild(fragment);
   const image = getImage(field.key);
   const editor = host.querySelector('.image-editor');
+  if (state.page.key === 'compare' && field.key === 'hero_art') editor.classList.add('is-source-only');
   editor.querySelector('.image-url').value = image.url || '';
   editor.querySelector('.image-alt').value = image.alt || '';
   editor.querySelector('.image-position').value = image.position || '50% 50%';
   editor.querySelector('.image-fit').value = image.fit || 'cover';
+  editor.querySelector('.image-zoom').value = String(image.zoom ?? 100);
   updateImagePreview(editor, image);
 
   const collectImage = () => {
@@ -222,13 +282,14 @@ function mountImageEditor(field) {
       url,
       alt: editor.querySelector('.image-alt').value.trim(),
       position: editor.querySelector('.image-position').value,
-      fit: editor.querySelector('.image-fit').value
+      fit: editor.querySelector('.image-fit').value,
+      zoom: Number(editor.querySelector('.image-zoom').value)
     };
     setValue(field.key, next);
     updateImagePreview(editor, next);
   };
 
-  editor.querySelectorAll('.image-url,.image-alt,.image-position,.image-fit').forEach(control => {
+  editor.querySelectorAll('.image-url,.image-alt,.image-position,.image-fit,.image-zoom').forEach(control => {
     control.addEventListener('input', collectImage);
     control.addEventListener('change', collectImage);
   });
@@ -236,8 +297,38 @@ function mountImageEditor(field) {
     setValue(field.key, null);
     editor.querySelector('.image-url').value = '';
     editor.querySelector('.image-alt').value = '';
+    editor.querySelector('.image-position').value = '50% 50%';
+    editor.querySelector('.image-zoom').value = '100';
     updateImagePreview(editor, getImage(field.key));
   });
+  editor.querySelector('.center-image').addEventListener('click', () => {
+    editor.querySelector('.image-position').value = '50% 50%';
+    collectImage();
+  });
+  const preview = editor.querySelector('.image-preview');
+  let drag = null;
+  preview.addEventListener('pointerdown', event => {
+    if (!getImage(field.key).url) return;
+    const point = imageCoordinates(getImage(field.key));
+    drag = { pointerId: event.pointerId, clientX: event.clientX, clientY: event.clientY, x: point.x, y: point.y };
+    preview.setPointerCapture(event.pointerId);
+    preview.classList.add('is-dragging');
+  });
+  preview.addEventListener('pointermove', event => {
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    const x = Math.max(0, Math.min(100, drag.x + ((event.clientX - drag.clientX) / (preview.clientWidth || 1)) * 100));
+    const y = Math.max(0, Math.min(100, drag.y + ((event.clientY - drag.clientY) / (preview.clientHeight || 1)) * 100));
+    editor.querySelector('.image-position').value = `${Math.round(x)}% ${Math.round(y)}%`;
+    collectImage();
+  });
+  const stopDrag = event => {
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    drag = null;
+    preview.classList.remove('is-dragging');
+    if (preview.hasPointerCapture(event.pointerId)) preview.releasePointerCapture(event.pointerId);
+  };
+  preview.addEventListener('pointerup', stopDrag);
+  preview.addEventListener('pointercancel', stopDrag);
   editor.querySelector('input[type="file"]').addEventListener('change', event => uploadImage(field, editor, event.target.files?.[0]));
 }
 
@@ -252,7 +343,7 @@ async function uploadImage(field, editor, file) {
   try {
     const safeKey = field.key.replace(/[^a-z0-9_-]/gi, '-');
     const url = await uploadMedia(file, `site-content/${state.page.key}/${safeKey}`);
-    const next = { url, path: url, alt: editor.querySelector('.image-alt').value.trim(), position: editor.querySelector('.image-position').value, fit: editor.querySelector('.image-fit').value };
+    const next = { url, path: url, alt: editor.querySelector('.image-alt').value.trim(), position: editor.querySelector('.image-position').value, fit: editor.querySelector('.image-fit').value, zoom: Number(editor.querySelector('.image-zoom').value) };
     editor.querySelector('.image-url').value = next.url;
     setValue(field.key, next);
     updateImagePreview(editor, next);
@@ -290,6 +381,8 @@ async function loadPage(pageKey, { force = false } = {}) {
     return;
   }
   state.page = getContentPage(pageKey);
+  state.activeTab = 'information';
+  state.activeGroups = {};
   elements.fields.innerHTML = '<div class="content-loading">Carregando conteúdo…</div>';
   setMessage('Carregando…');
   updatePageHeader();
@@ -359,6 +452,13 @@ async function savePage() {
 
 elements.pageSelect.innerHTML = SITE_CONTENT_PAGES.map(page => `<option value="${escapeHtml(page.key)}">${escapeHtml(page.label)}</option>`).join('');
 elements.pageSelect.addEventListener('change', () => loadPage(elements.pageSelect.value));
+elements.tabs.addEventListener('click', event => {
+  const tab = event.target.closest('[data-editor-tab]');
+  if (!tab) return;
+  state.activeTab = tab.dataset.editorTab;
+  renderFields();
+  if (state.activeTab === 'preview') elements.preview.focus();
+});
 elements.published.addEventListener('change', () => { state.published = elements.published.checked; updateDirty(); });
 elements.fields.addEventListener('input', event => {
   const control = event.target.closest('[data-content-key]');
@@ -374,8 +474,8 @@ elements.fields.addEventListener('change', event => {
   if (control) setValue(control.dataset.contentKey, control.value.trim());
 });
 elements.fields.addEventListener('click', event => {
-  const group = event.target.closest('[data-group-toggle]');
-  if (group) group.closest('.content-group').classList.toggle('is-open');
+  const group = event.target.closest('[data-editor-group]');
+  if (group) { state.activeGroups[state.activeTab] = group.dataset.editorGroup; renderFields(); return; }
   const reset = event.target.closest('[data-reset-key]');
   if (reset) { delete state.content[reset.dataset.resetKey]; renderFields(); updateDirty(); elements.preview.src = `${state.page.url}?cms=${Date.now()}`; }
 });
